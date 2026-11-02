@@ -1,0 +1,22 @@
+.status-card {
+  --status-color: #9ca3af;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 12px;
+  border: 2px solid var(--status-color);
+  background: color-mix(in srgb, var(--status-color) 10%, white);
+  transition: border-color 0.3s, background 0.3s;
+}
+
+.status-card__indicator {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--status-color);
+}
+
+.status-card--error {
+  --status-color: #ef4444;
+}
