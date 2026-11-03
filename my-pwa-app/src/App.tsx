@@ -1,9 +1,9 @@
-import { StatusCard } from './features/status/StatusCard'
+import { StatusList } from './features/status/StatusList'
 
 export default function App() {
   return (
     <main style={{ padding: 16 }}>
-      <StatusCard />
+      <StatusList />
     </main>
   )
 }

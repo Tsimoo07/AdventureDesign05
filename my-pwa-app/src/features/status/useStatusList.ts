@@ -1,16 +1,16 @@
 import { useCallback, useEffect, useState } from 'react'
-import { fetchStatus } from './api'
+import { fetchStatusList } from './api'
 import type { StatusData } from './types'
 
-interface UseStatusResult {
-  data: StatusData | null
+interface UseStatusListResult {
+  items: StatusData[]
   loading: boolean
   error: Error | null
   refetch: () => void
 }
 
-export function useStatus(pollMs?: number): UseStatusResult {
-  const [data, setData] = useState<StatusData | null>(null)
+export function useStatusList(pollMs?: number): UseStatusListResult {
+  const [items, setItems] = useState<StatusData[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
   const [tick, setTick] = useState(0)
@@ -21,9 +21,9 @@ export function useStatus(pollMs?: number): UseStatusResult {
     const controller = new AbortController()
 
     setLoading(true)
-    fetchStatus(controller.signal)
+    fetchStatusList(controller.signal)
       .then((result) => {
-        setData(result)
+        setItems(result)
         setError(null)
       })
       .catch((e: unknown) => {
@@ -35,12 +35,11 @@ export function useStatus(pollMs?: number): UseStatusResult {
     return () => controller.abort()
   }, [tick])
 
-  // 주기적 갱신이 필요한 경우에만
   useEffect(() => {
     if (!pollMs) return
     const id = setInterval(refetch, pollMs)
     return () => clearInterval(id)
   }, [pollMs, refetch])
 
-  return { data, loading, error, refetch }
+  return { items, loading, error, refetch }
 }

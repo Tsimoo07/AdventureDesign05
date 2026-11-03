@@ -20,3 +20,10 @@
 .status-card--error {
   --status-color: #ef4444;
 }
+
+.status-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
