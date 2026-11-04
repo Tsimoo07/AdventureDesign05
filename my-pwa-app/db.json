@@ -1,7 +1,8 @@
 {
   "statuses": [
-    { "id": "1", "label": "양식", "value": 81, "level": "danger" },
-    { "id": "2", "label": "한식", "value": 72, "level": "warning" },
-    { "id": "3", "label": "일식", "value": 32, "level": "normal" }
+    { "id": "1", "label": "양식", "value": 81},
+    { "id": "2", "label": "한식", "value": 72},
+    { "id": "3", "label": "일식", "value": 32},
+    { "id": "4", "label": "중식", "value": 100}
   ]
 }
