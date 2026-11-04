@@ -15,6 +15,7 @@ export default defineConfig({
         theme_color: '#ffffff',
         background_color: '#ffffff',
         display: 'standalone',
+        //orientation: 'portrait', // 모바일 규격으로 보기
         start_url: '/',
         icons: [
           { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },

@@ -23,7 +23,27 @@
 
 .status-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: 1fr; /* 기본: 한 줄 */
   gap: 12px;
   margin-top: 12px;
+}
+
+@media (min-width: 600px) {
+  .status-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+button {
+  min-height: 44px;
+  padding: 0 16px;
+  font-size: 16px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  cursor: pointer;
+}
+
+.status-card {
+  min-height: 64px;
 }
