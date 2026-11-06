@@ -1,13 +1,17 @@
-import type { StatusData } from './types'
+import type { Category } from './types'
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? ''
 
-export async function fetchStatusList(
-  signal?: AbortSignal,
-): Promise<StatusData[]> {
-  const res = await fetch(`${BASE_URL}/statuses`, { signal })
+async function request<T>(path: string, signal?: AbortSignal): Promise<T> {
+  const res = await fetch(`${BASE_URL}${path}`, { signal })
   if (!res.ok) {
     throw new Error(`요청 실패: ${res.status}`)
   }
-  return res.json() as Promise<StatusData[]>
+  return res.json() as Promise<T>
 }
+
+export const fetchCategories = (signal?: AbortSignal) =>
+  request<Category[]>('/categories', signal)
+
+export const fetchCategory = (id: string, signal?: AbortSignal) =>
+  request<Category>(`/categories/${id}`, signal)

@@ -47,3 +47,26 @@ button {
 .status-card {
   min-height: 64px;
 }
+
+.status-card__body {
+  flex: 1;
+}
+
+.status-card--link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.back-link {
+  display: inline-block;
+  padding: 8px 0;
+  color: inherit;
+  text-decoration: none;
+}

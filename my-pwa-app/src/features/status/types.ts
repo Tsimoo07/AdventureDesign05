@@ -1,9 +1,14 @@
-// 서버 응답 형태에 맞게 수정
 export type StatusLevel = 'normal' | 'warning' | 'danger'
 
 export interface StatusData {
   id: string
   label: string
   value: number
-  level: StatusLevel
+  level?: StatusLevel // 서버가 주지 않으면 value로 계산
+}
+
+export interface Category {
+  id: string
+  label: string
+  items: StatusData[]
 }
