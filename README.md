@@ -20,16 +20,16 @@ npm run dev
       "items": [  
         { "id": "1-1", "label": "양식", "value": 81, "level": "danger" },  
         { "id": "1-2", "label": "중식", "value": 40, "level": "normal" },  
-        { "id": "1-3", "label": "일식", "value": 55, "level": "warning" }  
-      ]  
+        { "id": "1-3", "label": "일식", "value": 55, "level": "warning" }
+      ]
     },  
     {  
       "id": "2",  
       "label": "2학생회관",  
       "items": [  
         { "id": "2-1", "label": "학생식", "value": 20, "level": "normal" },  
-        { "id": "2-2", "label": "교직원식", "value": 25, "level": "normal" }  
-      ]  
-    }  
+        { "id": "2-2", "label": "교직원식", "value": 25, "level": "normal" }
+      ]
+    }
   ]  
 }  
