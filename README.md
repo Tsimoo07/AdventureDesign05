@@ -12,11 +12,24 @@ npm run dev
 후 나오는 링크 실행  
 
 데이터 형식  
-{  
-  "statuses": [  
-    { "id": "1", "label": "양식", "value": 81}, //번호, 구역이름, 인구수  
-    { "id": "2", "label": "한식", "value": 72},  
-    { "id": "3", "label": "일식", "value": 32},  
-    { "id": "4", "label": "중식", "value": 100}  
-  ]  
-}  
+{
+  "categories": [
+    {
+      "id": "1",
+      "label": "1학생회관",
+      "items": [
+        { "id": "1-1", "label": "양식", "value": 81, "level": "danger" },
+        { "id": "1-2", "label": "중식", "value": 40, "level": "normal" },
+        { "id": "1-3", "label": "일식", "value": 55, "level": "warning" }
+      ]
+    },
+    {
+      "id": "2",
+      "label": "2학생회관",
+      "items": [
+        { "id": "2-1", "label": "학생식", "value": 20, "level": "normal" },
+        { "id": "2-2", "label": "교직원식", "value": 25, "level": "normal" }
+      ]
+    }
+  ]
+}
