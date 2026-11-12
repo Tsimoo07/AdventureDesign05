@@ -1,35 +1,71 @@
-# AdventureDesign05  
-어벤디 앱  
+# 여기, 차차 · chachaMap
 
-SSH 링크 :    
-git@github.com:Tsimoo07/AdventureDesign05.git  
+충남대학교 어드벤처디자인 5조의 캠퍼스 생활 안내 PWA입니다. React·TypeScript·Vite 기반으로 SUIT 폰트와 Tabler 아이콘을 사용합니다.
 
-로컬 서버 열기 (터미널 닫으면 미작동)  
-npx json-server db.json --port 3000  
+## 시작하기
 
-로컬 테스트 (터미널)  
-npm run dev  
-후 나오는 링크 실행  
+실제 앱은 `my-pwa-app/`에 있습니다. Node.js 22.12 이상을 권장하며 현재 검증 환경은 Node.js 26입니다.
 
-데이터 형식  
-{  
-  "categories": [  
-    {  
-      "id": "1",  
-      "label": "1학생회관",  
-      "items": [  
-        { "id": "1-1", "label": "양식", "value": 81, "level": "danger" },  
-        { "id": "1-2", "label": "중식", "value": 40, "level": "normal" },  
-        { "id": "1-3", "label": "일식", "value": 55, "level": "warning" }
-      ]
-    },  
-    {  
-      "id": "2",  
-      "label": "2학생회관",  
-      "items": [  
-        { "id": "2-1", "label": "학생식", "value": 20, "level": "normal" },  
-        { "id": "2-2", "label": "교직원식", "value": 25, "level": "normal" }
-      ]
-    }
-  ]  
-}  
+```sh
+cd my-pwa-app
+npm ci
+npm run dev
+```
+
+기본은 백엔드 없이 실행되는 **예시 모드**입니다. 실제 혼잡도와 버스 도착 정보가 아닙니다.
+
+## 구현 기능
+
+- **홈:** 캠퍼스 대시보드, 오늘의 저장된 수업, 주요 기능 바로가기
+- **식사:** 제1학생회관 구역별 색상 도면, 혼잡도 목록, 장소 검색, 즐겨찾기
+- **시간표:** 빈 시간표에서 수업 추가·수정·삭제, 중복 시간 방지
+- **버스·지도:** 예시 경로 안내, 카카오 지도 SDK 연결 준비 및 외부 지도 링크
+- **PWA:** 설치용 manifest·아이콘, 앱 화면과 폰트의 오프라인 캐시
+- **UI:** 메뉴 선택 배경 이동, 화면·카드·모달 애니메이션, 동작 줄이기 지원
+
+시간표·즐겨찾기·프로필은 브라우저 localStorage에 저장합니다. 로그인이나 기기 간 동기화는 제공하지 않습니다.
+
+## 빌드 및 검사
+
+앱 디렉터리에서 실행합니다. 테스트는 빌드 결과도 검사하므로 빌드를 먼저 실행하세요.
+
+```sh
+npm run build
+npm test
+npm run preview
+```
+
+실제 기기의 PWA 설치에는 HTTPS 배포가 필요합니다. 정적 호스팅에 `my-pwa-app/dist/`를 배포하고 SPA fallback을 설정하세요.
+
+## API 연결
+
+`my-pwa-app/.env.example`을 참고해 `.env.local`을 만듭니다.
+
+```dotenv
+VITE_USE_DEMO=false
+VITE_API_URL=http://localhost:3000
+VITE_KAKAO_MAP_KEY=
+```
+
+- 혼잡도: `GET /categories`, `GET /categories/:id`. 상세 화면에서 15초마다 조회합니다.
+- 도면: 응답의 `zoneId` 또는 `id`를 구역 0–9와 연결합니다. 미연결 구역은 회색입니다.
+- 지도: 카카오 **JavaScript 키**와 실행 도메인 등록이 필요합니다. REST/Admin 키는 넣지 마세요.
+- 환경변수 변경 후 개발 서버를 재시작하거나 다시 빌드하세요.
+
+기존 JSON 샘플 서버는 앱 디렉터리의 별도 터미널에서 실행합니다.
+
+```sh
+npx json-server db.json --port 3000
+```
+
+기존 `db.json`은 단순 목록용 샘플입니다. 도면과 연결하려면 구역별 `zoneId`를 추가해야 합니다.
+
+[상세 API 형식·구역 번호·지도 설정·PWA 안내](my-pwa-app/README.md)를 참고하세요.
+
+## 현재 한계와 검증 범위
+
+- 실시간 센서 수집 서버, 버스 도착 API, AI 추천은 미구현입니다.
+- 에브리타임 공유 링크 파싱·자동 연동은 **미구현**입니다. 공유 페이지 접근 제한으로 데이터 형식을 검증하지 못했습니다.
+- TypeScript 빌드와 API 검증·구역 색상·PWA 에셋 테스트를 통과했습니다.
+- 초기 UI의 모바일 표시·저장·오프라인 동작은 브라우저에서 확인했습니다. 이후 추가한 동적 도면·지도는 최종 브라우저 검증이 남아 있습니다.
+- 실제 지도 키·센서 API 연결과 iOS/Android 설치는 미검증입니다.
