@@ -2,15 +2,26 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 
+import { everytime } from "./server/everytime.ts";
+
 export default defineConfig({
   plugins: [
     react(),
+    {
+      name: "everytime-import",
+      configureServer(server) {
+        server.middlewares.use(everytime);
+      },
+      configurePreviewServer(server) {
+        server.middlewares.use(everytime);
+      },
+    },
     VitePWA({
       registerType: "autoUpdate",
       includeAssets: ["icons/*.png", "fonts/*.woff2", "images/*.png"],
       workbox: {
         globPatterns: ["**/*.{js,css,html,png,svg,woff2}"],
-        navigateFallbackDenylist: [/^\/categories(?:\/|$)/],
+        navigateFallbackDenylist: [/^\/api(?:\/|$)/, /^\/categories(?:\/|$)/],
       },
       manifest: {
         name: "여기, 차차 · chachaMap",

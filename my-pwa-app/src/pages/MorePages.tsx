@@ -1,6 +1,14 @@
+import {
+  isLesson,
+  formatTime,
+  shareIdentifier,
+  type Lesson,
+} from "../features/timetable/model";
+import { parseTimetable } from "../features/timetable/import";
 import { useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import {
+  IconLink,
   IconHome,
   IconBackpack,
   IconChevronRight,
@@ -150,37 +158,28 @@ export function FoodPage() {
   );
 }
 
-export type Lesson = {
-  id: string;
-  title: string;
-  day: number;
-  start: number;
-  end: number;
-};
-export function isLesson(value: unknown): value is Lesson {
-  if (!value || typeof value !== "object") return false;
-  const v = value as Lesson;
-  return (
-    typeof v.id === "string" &&
-    typeof v.title === "string" &&
-    v.title.length > 0 &&
-    Number.isInteger(v.day) &&
-    v.day >= 0 &&
-    v.day <= 4 &&
-    Number.isInteger(v.start) &&
-    Number.isInteger(v.end) &&
-    v.start >= 8 &&
-    v.end <= 19 &&
-    v.start < v.end
-  );
-}
-const days = ["월", "화", "수", "목", "금"];
+const days = ["월", "화", "수", "목", "금", "토", "일"];
 export function TimetablePage() {
   const [lessons, save, saveError] = useSaved<Lesson[]>(
     "chacha-lessons",
     [],
     (v) => Array.isArray(v) && v.every(isLesson),
   );
+  const [importOpen, setImportOpen] = useState(false);
+  const subjectTitles = [...new Set(lessons.map((l) => l.title.trim()))].sort();
+  const [link, setLink] = useState("");
+  const [importing, setImporting] = useState(false);
+  const [importError, setImportError] = useState("");
+  const [preview, setPreview] = useState<ReturnType<
+    typeof parseTimetable
+  > | null>(null);
+  const [untimed, saveUntimed] = useSaved<string[]>(
+    "chacha-untimed",
+    [],
+    (v) => Array.isArray(v) && v.every((x) => typeof x === "string"),
+  );
+  const firstHour = Math.min(8, ...lessons.map((l) => Math.floor(l.start)));
+  const dayCount = lessons.some((l) => l.day > 4) ? 7 : 5;
   const [editing, setEditing] = useState<Lesson | null>(null);
   const [error, setError] = useState("");
   const dialog = useRef<HTMLDialogElement>(null);
@@ -191,50 +190,175 @@ export function TimetablePage() {
     <section>
       <SearchHeader />
       <div className="timetable-title">
-        <h1>2학기 시간표</h1>
-        <button
-          className="round"
-          aria-label="수업 추가"
-          onClick={() => {
-            setEditing({
-              id: crypto.randomUUID(),
-              title: "",
-              day: 0,
-              start: 9,
-              end: 10,
-            });
-            setError("");
-          }}
-        >
-          <IconPlus size={27} />
-        </button>
+        <h1>내 시간표</h1>
+        <div className="timetable-actions">
+          <button
+            className="round"
+            aria-label="시간표 링크 가져오기"
+            title="시간표 링크 가져오기"
+            aria-expanded={importOpen}
+            aria-controls="timetable-import"
+            onClick={() => setImportOpen(!importOpen)}
+          >
+            <IconLink size={23} />
+          </button>
+          <button
+            className="round"
+            aria-label="수업 추가"
+            onClick={() => {
+              setEditing({
+                id: crypto.randomUUID(),
+                title: "",
+                day: 0,
+                start: 9,
+                end: 10,
+              });
+              setError("");
+            }}
+          >
+            <IconPlus size={27} />
+          </button>
+        </div>
       </div>
       <p className="eyebrow">
         {lessons.length
           ? "이 기기에 저장된 시간표"
           : "등록된 수업 없음 · + 버튼으로 수업 추가"}
       </p>
+      <div id="timetable-import" hidden={!importOpen}>
+        <form
+          className="profile-form"
+          onSubmit={async (e) => {
+            e.preventDefault();
+            setImportError("");
+            setPreview(null);
+            try {
+              shareIdentifier(link);
+              setImporting(true);
+              const response = await fetch("/api/everytime", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ url: link.trim() }),
+                signal: AbortSignal.timeout(15000),
+              });
+              if (
+                !response.headers
+                  .get("content-type")
+                  ?.includes("application/json")
+              )
+                throw new Error("시간표 연동 서버가 연결되지 않았어요.");
+              const data = await response.json();
+              if (!response.ok)
+                throw new Error(data.error || "시간표를 가져오지 못했어요.");
+              if (typeof data.xml !== "string")
+                throw new Error("잘못된 서버 응답입니다.");
+              setPreview(parseTimetable(data.xml));
+            } catch (error) {
+              setImportError(
+                error instanceof Error
+                  ? error.message
+                  : "시간표를 가져오지 못했어요.",
+              );
+            } finally {
+              setImporting(false);
+            }
+          }}
+        >
+          <label>
+            에브리타임 시간표 링크
+            <input
+              type="url"
+              required
+              value={link}
+              onChange={(e) => {
+                setLink(e.target.value);
+                setPreview(null);
+              }}
+              placeholder="https://everytime.kr/@…"
+              disabled={importing}
+            />
+          </label>
+          <button className="primary" disabled={importing}>
+            {importing ? "불러오는 중…" : "링크로 불러오기"}
+          </button>
+          <small>
+            공개 시간표를 가져와 이 기기에 저장합니다. 자동 갱신되지 않아요.
+          </small>
+        </form>
+        {importError && <p role="alert">{importError}</p>}
+        {preview && (
+          <div className="notice">
+            <h2>가져올 시간표 확인</h2>
+            <ul>
+              {preview.lessons.map((l) => (
+                <li key={l.id}>
+                  {days[l.day]} {formatTime(l.start)}–{formatTime(l.end)} ·{" "}
+                  {l.title}
+                </li>
+              ))}
+              {preview.untimed.map((name, i) => (
+                <li key={i}>시간 미지정 · {name}</li>
+              ))}
+            </ul>
+            <p>
+              저장하면 기존 수업 {lessons.length}개와 시간 미지정 수업{" "}
+              {untimed.length}개를 교체합니다.
+            </p>
+            <button
+              className="primary"
+              onClick={() => {
+                const old = untimed;
+                if (!saveUntimed(preview.untimed)) {
+                  setImportError("저장 공간을 확인해 주세요.");
+                  return;
+                }
+                if (save(preview.lessons)) {
+                  setPreview(null);
+                  setImportOpen(false);
+                } else saveUntimed(old);
+              }}
+            >
+              확인 후 시간표 교체
+            </button>
+            <button className="text-button" onClick={() => setPreview(null)}>
+              취소
+            </button>
+          </div>
+        )}
+      </div>
+      {untimed.length > 0 && (
+        <p className="notice">시간 미지정: {untimed.join(", ")}</p>
+      )}
       <div className="timetable">
-        <div className="weekdays">
+        <div
+          className="weekdays"
+          style={{ gridTemplateColumns: `42px repeat(${dayCount}, 1fr)` }}
+        >
           <span />
-          {days.map((day) => (
+          {days.slice(0, dayCount).map((day) => (
             <b key={day}>{day}</b>
           ))}
         </div>
         <div className="calendar-body">
           <div className="hours">
-            {Array.from({ length: 11 }, (_, i) => (
-              <span key={i}>{i + 8}</span>
+            {Array.from({ length: (24 - firstHour) * 2 }, (_, i) => (
+              <span key={i}>{formatTime(firstHour + i / 2)}</span>
             ))}
           </div>
-          <div className="calendar-grid">
+          <div
+            className="calendar-grid"
+            style={{ height: (24 - firstHour) * 60 }}
+          >
             {lessons.map((lesson) => (
               <button
                 className="lesson"
                 key={lesson.id}
                 style={{
-                  left: `${lesson.day * 20}%`,
-                  top: (lesson.start - 8) * 60,
+                  backgroundColor: `hsl(${(subjectTitles.indexOf(lesson.title.trim()) * 137.508 + 255) % 360} 34% 27%)`,
+                  borderColor: `hsl(${(subjectTitles.indexOf(lesson.title.trim()) * 137.508 + 255) % 360} 40% 48%)`,
+                  left: `${(lesson.day * 100) / dayCount}%`,
+                  width: `${100 / dayCount}%`,
+                  top: (lesson.start - firstHour) * 60,
                   height: (lesson.end - lesson.start) * 60,
                 }}
                 onClick={() => {
@@ -244,7 +368,7 @@ export function TimetablePage() {
               >
                 <strong>{lesson.title}</strong>
                 <small>
-                  {lesson.start}:00–{lesson.end}:00
+                  {formatTime(lesson.start)}–{formatTime(lesson.end)}
                 </small>
               </button>
             ))}
@@ -328,26 +452,38 @@ export function TimetablePage() {
               <label>
                 시작 시간
                 <input
-                  type="number"
-                  min="8"
-                  max="18"
+                  type="time"
+                  step="1800"
+                  min="00:00"
+                  max="23:30"
                   required
-                  value={editing.start}
+                  value={formatTime(editing.start)}
                   onChange={(e) =>
-                    setEditing({ ...editing, start: Number(e.target.value) })
+                    setEditing({
+                      ...editing,
+                      start: e.target.value
+                        .split(":")
+                        .reduce((h, v, i) => h + Number(v) / (i ? 60 : 1), 0),
+                    })
                   }
                 />
               </label>
               <label>
                 종료 시간
                 <input
-                  type="number"
-                  min="9"
-                  max="19"
+                  type="time"
+                  step="1800"
+                  min="00:30"
+                  max="23:59"
                   required
-                  value={editing.end}
+                  value={formatTime(editing.end)}
                   onChange={(e) =>
-                    setEditing({ ...editing, end: Number(e.target.value) })
+                    setEditing({
+                      ...editing,
+                      end: e.target.value
+                        .split(":")
+                        .reduce((h, v, i) => h + Number(v) / (i ? 60 : 1), 0),
+                    })
                   }
                 />
               </label>

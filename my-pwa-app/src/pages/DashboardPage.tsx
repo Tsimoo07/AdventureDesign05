@@ -12,7 +12,7 @@ import {
 import { fetchCategories, isDemo } from "../features/status/api";
 import { useFetch } from "../features/status/useFetch";
 import { useSaved } from "../useSaved";
-import { isLesson, type Lesson } from "./MorePages";
+import { isLesson, formatTime, type Lesson } from "../features/timetable/model";
 
 export default function DashboardPage() {
   const { data, loading, error, refetch } = useFetch(fetchCategories);
@@ -106,8 +106,8 @@ export default function DashboardPage() {
           todayLessons.map((lesson) => (
             <Link key={lesson.id} to="/timetable" className="dashboard-lesson">
               <span>
-                {String(lesson.start).padStart(2, "0")}:00
-                <small>{String(lesson.end).padStart(2, "0")}:00</small>
+                {formatTime(lesson.start)}
+                <small>{formatTime(lesson.end)}</small>
               </span>
               <strong>{lesson.title}</strong>
               <IconChevronRight size={18} />

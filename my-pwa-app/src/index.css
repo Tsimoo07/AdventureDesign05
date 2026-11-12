@@ -509,7 +509,7 @@ main {
   display: flex;
 }
 .hours {
-  width: 28px;
+  width: 42px;
   flex-shrink: 0;
   color: var(--muted);
   font-size: 16px;
@@ -519,7 +519,8 @@ main {
 }
 .hours span {
   display: block;
-  height: 60px;
+  font-size: 10px;
+  height: 30px;
 }
 .calendar-grid {
   position: relative;
@@ -528,9 +529,9 @@ main {
   background: repeating-linear-gradient(
     to bottom,
     transparent 0,
-    transparent 59px,
-    #202020 59px,
-    #202020 60px
+    transparent 29px,
+    #202020 29px,
+    #202020 30px
   );
 }
 .lesson {
@@ -1171,4 +1172,14 @@ dialog.sheet::backdrop {
 }
 .floor-zone.ready {
   background: #666;
+}
+
+.timetable-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.timetable-actions button[aria-expanded="true"] {
+  background: #393064;
+  color: #fff;
 }

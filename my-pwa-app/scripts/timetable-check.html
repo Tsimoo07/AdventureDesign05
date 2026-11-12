@@ -1,0 +1,13 @@
+<!doctype html><html lang="ko"><meta charset="utf-8"><title>시간표 파서 검사</title><body><pre id="result">검사 중</pre><script type="module">
+import { parseTimetable } from '/src/features/timetable/import.ts';
+const assert = (v) => { if (!v) throw Error('검증 실패'); };
+try {
+ const data = parseTimetable('<response><table><subject><name value="수학 &amp; 실습"/><time><data day="2" starttime="162" endtime="180"/><data day="3" starttime="264" endtime="276"/></time></subject><subject><name value="상담"/></subject></table></response>');
+ assert(data.lessons.length === 2 && data.lessons[0].start === 13.5 && data.lessons[0].title === '수학 & 실습');
+ assert(data.lessons[1].start === 22 && data.lessons[1].end === 23 && data.untimed[0] === '상담');
+ for (const xml of ['<response>-1</response>', '<response><table status="-2"/></response>', '<response><table/></response>', '<bad', '<response><table><subject><name value="수업"/><time><data day="0" starttime="bad" endtime="180"/></time></subject></table></response>']) {
+   let failed = false; try { parseTimetable(xml); } catch { failed = true; } assert(failed);
+ }
+ document.querySelector('#result').textContent = 'PASS: XML 변환, 13:30, 22:00, 시간 미지정, 엔티티, 비공개/빈/잘못된 응답';
+} catch(e) { document.querySelector('#result').textContent = 'FAIL: ' + e.message; }
+</script></body></html>

@@ -101,3 +101,41 @@ assert.equal(
 console.log(
   "PASS: zone color boundaries, ready/unknown states, stable region IDs, timestamps",
 );
+
+const { isLesson, formatTime, shareIdentifier } =
+  await import("../src/features/timetable/model.ts");
+assert.equal(formatTime(13.5), "13:30");
+assert.equal(formatTime(22), "22:00");
+assert.equal(
+  isLesson({ id: "a", title: "수업", day: 0, start: 13.5, end: 15 }),
+  true,
+);
+assert.equal(
+  isLesson({ id: "a", title: "수업", day: 6, start: 22, end: 23.5 }),
+  true,
+);
+for (const change of [
+  { start: NaN },
+  { end: 25 },
+  { day: 7 },
+  { start: 15, end: 14 },
+  { title: "" },
+])
+  assert.equal(
+    isLesson({ id: "a", title: "수업", day: 0, start: 9, end: 10, ...change }),
+    false,
+  );
+assert.equal(
+  shareIdentifier("https://everytime.kr/app/@abcdefghij1234"),
+  "abcdefghij1234",
+);
+for (const url of [
+  "http://everytime.kr/@abcdefghij1234",
+  "https://everytime.kr.evil.test/@abcdefghij1234",
+  "https://user@everytime.kr/@abcdefghij1234",
+  "https://everytime.kr/login",
+])
+  assert.throws(() => shareIdentifier(url));
+console.log(
+  "PASS: half-hour/evening lessons, legacy model, share URL validation",
+);
