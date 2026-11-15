@@ -11,6 +11,11 @@ import { useFetch } from "../features/status/useFetch";
 import { FloorPlan } from "../components/FloorPlan";
 import { zoneLevel, zoneLabels } from "../features/status/zones";
 import { useSaved } from "../useSaved";
+import {
+  ZONE_FAVORITES_KEY,
+  zoneKey,
+  isStringArray,
+} from "../features/status/favorites";
 
 export default function CategoryPage() {
   const { id = "1" } = useParams<{ id: string }>();
@@ -27,13 +32,27 @@ export default function CategoryPage() {
     return () => window.clearInterval(timer);
   }, [refetch]);
   const [selected, setSelected] = useState<string | null>(null);
-  const [favorites, setFavorites, saveError] = useSaved<string[]>(
-    "chacha-favorites",
-    [],
-    (value) =>
-      Array.isArray(value) && value.every((v) => typeof v === "string"),
-  );
-  const favorite = favorites.includes(id);
+const [favorites, setFavorites, saveError] = useSaved<string[]>(
+  ZONE_FAVORITES_KEY,
+  [],
+  isStringArray,
+);
+
+  // 선택된 구역과 그 구역의 즐겨찾기 여부
+  const selectedItem = data?.items.find((item) => item.id === selected);
+  const selectedKey = selectedItem ? zoneKey(id, selectedItem.id) : null;
+  const selectedFavorite =
+    selectedKey !== null && favorites.includes(selectedKey);
+
+  const toggleFavorite = () => {
+    if (selectedKey === null) return;
+    setFavorites(
+      selectedFavorite
+        ? favorites.filter((value) => value !== selectedKey)
+        : [...favorites, selectedKey],
+    );
+  };
+
   return (
     <section>
       <header className="detail-header">
@@ -76,6 +95,7 @@ export default function CategoryPage() {
             <div className="zone-list">
               {data.items.map((item, index) => {
                 const level = zoneLevel(item);
+                const isFavorite = favorites.includes(zoneKey(id, item.id));
                 return (
                   <button
                     key={item.id}
@@ -88,7 +108,17 @@ export default function CategoryPage() {
                     <span className="zone-number">
                       {item.zoneId ?? item.id ?? index}
                     </span>
-                    <span className="zone-name">{item.label}</span>
+                    <span className="zone-name">
+                      {item.label}
+                      {isFavorite && (
+                        <IconStar
+                          className="zone-star"
+                          size={16}
+                          fill="currentColor"
+                          aria-label="즐겨찾기한 구역"
+                        />
+                      )}
+                    </span>
                     <span className={`badge ${level}`}>
                       {zoneLabels[level]}
                     </span>
@@ -98,29 +128,33 @@ export default function CategoryPage() {
             </div>
           </div>
           <div className="detail-footer">
-            {selected !== null ? (
+            {selectedItem ? (
               <p role="status">
-                {data.items.find((item) => item.id === selected)?.label} ·{" "}
+                {selectedItem.label} ·{" "}
                 {isDemo
                   ? "화면 시연용 혼잡 정보입니다."
-                  : `혼잡도 ${data.items.find((item) => item.id === selected)?.value}%`}
+                  : `혼잡도 ${selectedItem.value}%`}
               </p>
             ) : (
               <p>구역을 눌러 자세히 확인하세요</p>
             )}
             <button
               className="round"
-              aria-label={favorite ? "즐겨찾기 해제" : "즐겨찾기 추가"}
-              aria-pressed={favorite}
-              onClick={() =>
-                setFavorites(
-                  favorite
-                    ? favorites.filter((value) => value !== id)
-                    : [...favorites, id],
-                )
+              aria-label={
+                selectedItem
+                  ? selectedFavorite
+                    ? `${selectedItem.label} 즐겨찾기 해제`
+                    : `${selectedItem.label} 즐겨찾기 추가`
+                  : "구역을 선택하면 즐겨찾기에 추가할 수 있습니다"
               }
+              aria-pressed={selectedFavorite}
+              disabled={!selectedItem}
+              onClick={toggleFavorite}
             >
-              <IconStar fill={favorite ? "currentColor" : "none"} size={22} />
+              <IconStar
+                fill={selectedFavorite ? "currentColor" : "none"}
+                size={22}
+              />
             </button>
             <button
               className="round"
