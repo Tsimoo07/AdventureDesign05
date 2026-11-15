@@ -1183,3 +1183,8 @@ dialog.sheet::backdrop {
   background: #393064;
   color: #fff;
 }
+.zone-star {
+  margin-left: 4px;
+  vertical-align: -5px;
+  color: #f59e0b;
+}
