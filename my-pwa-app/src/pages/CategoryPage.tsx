@@ -9,7 +9,7 @@ import {
 import { fetchCategory, isDemo } from "../features/status/api";
 import { useFetch } from "../features/status/useFetch";
 import { FloorPlan } from "../components/FloorPlan";
-import { zoneLevel, zoneLabels } from "../features/status/zones";
+import { floorPlans, zoneLevel, zoneLabels } from "../features/status/zones";
 import { useSaved } from "../useSaved";
 import {
   ZONE_FAVORITES_KEY,
@@ -19,6 +19,7 @@ import {
 
 export default function CategoryPage() {
   const { id = "1" } = useParams<{ id: string }>();
+  const plan = floorPlans[id];
   const fetcher = useCallback(
     (signal: AbortSignal) => fetchCategory(id, signal),
     [id],
@@ -85,8 +86,9 @@ const [favorites, setFavorites, saveError] = useSaved<string[]>(
       {data && (
         <>
           <div className="congestion-panel">
-            {id === "1" && (
+            {plan && (
               <FloorPlan
+                plan={plan}
                 items={data.items}
                 selected={selected}
                 onSelect={setSelected}

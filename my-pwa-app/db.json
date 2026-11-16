@@ -20,8 +20,13 @@
       "id": "2",
       "label": "제 2 학생회관",
       "items": [
-        { "id": "2-1", "label": "학생식", "value": 20, "level": "normal" },
-        { "id": "2-2", "label": "교직원식", "value": 45, "level": "warning" }
+        { "id": "0", "label": "99카페", "value": 10, "level": "normal" },
+        { "id": "1", "label": "학생식", "value": 80, "level": "danger" },
+        { "id": "2", "label": "교직원식", "value": 90, "level": "danger" },
+        { "id": "3", "label": "식사구역 1", "value": 45, "level": "warning" },
+        { "id": "4", "label": "식사구역 2", "value": 45, "level": "warning" },
+        { "id": "5", "label": "GS25", "value": 8, "level": "normal" },
+        { "id": "6", "label": "키오스크", "value": 45, "level": "warning" }
       ]
     }
   ]
