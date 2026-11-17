@@ -1,0 +1,225 @@
+main.entry-main {
+  padding-bottom: 32px;
+}
+.welcome-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.welcome-header > a:last-child {
+  display: flex;
+  align-items: center;
+  font-size: 13px;
+  color: var(--muted);
+  min-height: 44px;
+}
+.welcome-intro {
+  margin: 52px 4px 30px;
+}
+.welcome-intro > p:first-child {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 14px;
+}
+.welcome-intro h1 {
+  font-size: clamp(34px, 9.6vw, 39px);
+  line-height: 1.22;
+  letter-spacing: -1.7px;
+  font-weight: 800;
+  margin-bottom: 20px;
+}
+.welcome-intro > p:last-child {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--muted);
+}
+.welcome-preview {
+  padding: 22px;
+  border-radius: 28px;
+  background: linear-gradient(135deg, var(--surface), var(--field));
+  overflow: hidden;
+}
+.welcome-preview-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+  font-size: 13px;
+}
+.welcome-preview-heading > span {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-weight: 700;
+}
+.welcome-preview-heading small {
+  font-size: 11px;
+  color: var(--muted);
+}
+.welcome-plan {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: 48px 36px 30px;
+  gap: 4px;
+  margin: 24px 0;
+  border-radius: 16px;
+  overflow: hidden;
+}
+.welcome-plan span {
+  background: color-mix(in srgb, var(--ink) 12%, var(--surface));
+  border-radius: 4px;
+}
+.welcome-plan span:first-child {
+  grid-column: span 3;
+  grid-row: span 1;
+}
+.welcome-plan span:nth-child(3) {
+  grid-column: span 2;
+  background: color-mix(in srgb, var(--accent) 30%, var(--surface));
+}
+.welcome-plan span:nth-child(6) {
+  grid-column: span 2;
+}
+.welcome-plan span:nth-child(8) {
+  background: color-mix(in srgb, var(--accent) 50%, var(--surface));
+}
+.welcome-preview-caption {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+}
+.welcome-preview-caption > span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.welcome-preview-caption i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent-text);
+}
+.welcome-preview-caption strong {
+  color: var(--accent-text);
+}
+.welcome-preview > p {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 9px;
+}
+.welcome-actions {
+  margin-top: 24px;
+  text-align: center;
+}
+.welcome-primary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 17px 20px;
+  min-height: 54px;
+  border-radius: 18px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+}
+.welcome-actions > small {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 12px;
+}
+.welcome-features {
+  display: grid;
+  gap: 27px;
+  margin: 42px 4px;
+}
+.welcome-features > div {
+  display: flex;
+  gap: 15px;
+  align-items: flex-start;
+}
+.welcome-features svg {
+  color: var(--muted);
+  flex-shrink: 0;
+}
+.welcome-features strong {
+  font-size: 15px;
+}
+.welcome-features p {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.6;
+  margin-top: 5px;
+}
+.welcome-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 11px;
+  margin: 30px 4px 0;
+}
+.welcome-footer strong {
+  font-size: 17px;
+  color: var(--ink);
+}
+.login-page {
+  padding: 0 4px;
+}
+.login-heading {
+  margin: 65px 0 34px;
+}
+.login-heading h1 {
+  font-size: 34px;
+  line-height: 1.3;
+  margin-bottom: 15px;
+}
+.login-heading p {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.7;
+}
+.login-demo-notice {
+  padding: 18px;
+  border-radius: 18px;
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.7;
+  margin-bottom: 24px;
+}
+.login-provider {
+  width: 100%;
+  min-height: 54px;
+  background: var(--field);
+  border-radius: 18px;
+  font-weight: 650;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+.login-provider svg {
+  width: 20px;
+  height: 20px;
+}
+.login-message {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+  margin: 12px 0;
+  min-height: 42px;
+}
+.login-guest {
+  display: flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-text);
+  font-size: 14px;
+  margin-top: 16px;
+}

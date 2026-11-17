@@ -46,7 +46,7 @@ export default function DashboardPage() {
   return (
     <section className="dashboard">
       <header className="dashboard-header">
-        <Link className="wordmark" to="/">
+        <Link className="wordmark" to="/home">
           밥길<span>bapgil</span>
         </Link>
       </header>

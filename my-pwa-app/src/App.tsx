@@ -1,3 +1,5 @@
+import WelcomePage from "./pages/WelcomePage";
+import LoginPage from "./pages/LoginPage";
 import { isEvaluation } from "./evaluation";
 import {
   BrowserRouter,
@@ -6,7 +8,8 @@ import {
   Link,
   useLocation,
 } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { EvaluationNotice } from "./components/EvaluationNotice";
 import { RubberDock } from "./components/RubberDock";
 import DashboardPage from "./pages/DashboardPage";
 import CategoryPage from "./pages/CategoryPage";
@@ -17,6 +20,7 @@ import { useSaved } from "./useSaved";
 
 function AppContent() {
   const { pathname } = useLocation();
+  const [noticeDismissed, setNoticeDismissed] = useState(false);
   const [theme, saveTheme, themeError] = useSaved<"light" | "dark">(
     "chacha-theme",
     "light",
@@ -31,6 +35,7 @@ function AppContent() {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [pathname]);
+  const isEntryPage = pathname === "/" || pathname === "/login";
   const activeTab =
     pathname.startsWith("/category") || pathname.startsWith("/food")
       ? 2
@@ -46,14 +51,12 @@ function AppContent() {
       <a className="skip-link" href="#content">
         본문으로 이동
       </a>
-      <main id="content">
-        {isEvaluation && <aside className="evaluation-notice" aria-label="형성평가 데모 안내">
-          <strong>밥길 체험용 데모</strong>
-          <span>혼잡도·버스는 예시입니다. 실제 이동 판단에 사용하지 마세요. 입력 내용은 이 브라우저에만 저장됩니다.</span>
-        </aside>}
+      <main id="content" className={isEntryPage ? "entry-main" : undefined}>
         <div key={pathname} className="page-transition">
           <Routes>
-            <Route path="/" element={<DashboardPage />} />
+            <Route path="/" element={<WelcomePage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/home" element={<DashboardPage />} />
             <Route path="/search" element={<HomePage />} />
             <Route path="/category/:id" element={<CategoryPage />} />
             <Route path="/bus" element={<BusPage />} />
@@ -75,14 +78,17 @@ function AppContent() {
               element={
                 <section className="empty">
                   <h1>페이지를 찾을 수 없어요</h1>
-                  <Link to="/">홈으로 돌아가기</Link>
+                  <Link to="/home">홈으로 돌아가기</Link>
                 </section>
               }
             />
           </Routes>
         </div>
       </main>
-      <RubberDock active={activeTab} />
+      {!isEntryPage && <RubberDock active={activeTab} />}
+      {isEvaluation && !isEntryPage && !noticeDismissed && (
+        <EvaluationNotice onDismiss={() => setNoticeDismissed(true)} />
+      )}
     </>
   );
 }

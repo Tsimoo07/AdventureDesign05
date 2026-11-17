@@ -12,7 +12,7 @@ import { clamp, presets as p } from "./motion/spring";
 import "./motion/components.css";
 const tabs = [
   {
-    to: "/",
+    to: "/home",
     label: "홈",
     Icon: IconHome,
     text: "오늘의 수업과 학생회관 혼잡도를 한눈에 확인하세요.",

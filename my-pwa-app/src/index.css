@@ -1543,8 +1543,6 @@ button:active { filter: brightness(.94); }
 @media (prefers-contrast: more) {
   .dashboard-hero, .sheet, .theme-picker { outline: 1px solid var(--ink); }
 }
-.evaluation-notice { display:grid;gap:5px;margin:0 0 24px;padding:12px 14px;border-radius:16px;background:var(--field);color:var(--muted);font-size:12px;line-height:1.5; }
-.evaluation-notice strong { color:var(--ink);font-size:13px; }
 .zone-star {
   margin-left: 4px;
   vertical-align: -5px;
@@ -1572,3 +1570,22 @@ button:active { filter: brightness(.94); }
 .floor-plan-2 .floor-zone-0 {
   border-radius: 0 0 0 12px;
 }
+
+.evaluation-dialog {
+  width: calc(100% - 40px);
+  max-width: 350px;
+  margin: auto;
+  padding: 28px 24px 24px;
+  border: 0;
+  border-radius: 28px;
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 24px 80px #0003;
+}
+.evaluation-dialog::backdrop { background: rgb(0 0 0 / 48%); }
+.evaluation-close { position: absolute; top: 10px; right: 10px; width: 44px; height: 44px; display: grid; place-items: center; color: var(--muted); border-radius: 50%; }
+.evaluation-info { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 18px; background: var(--field); color: var(--accent-text); margin-bottom: 24px; }
+.evaluation-dialog h2 { font-size: 22px; line-height: 1.35; margin-bottom: 12px; }
+.evaluation-dialog p { font-size: 14px; line-height: 1.7; color: var(--muted); }
+.evaluation-dialog .evaluation-storage { margin-top: 14px; font-size: 12px; }
+.evaluation-confirm { width: 100%; min-height: 48px; margin-top: 24px; border-radius: 16px; }

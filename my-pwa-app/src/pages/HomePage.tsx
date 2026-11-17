@@ -20,7 +20,7 @@ export default function HomePage() {
   return (
     <section>
       <header className="search-header">
-        <Link className="round purple" to="/" aria-label="홈으로">
+        <Link className="round purple" to="/home" aria-label="홈으로">
           <IconChevronLeft />
         </Link>
         <label className="search-input">
