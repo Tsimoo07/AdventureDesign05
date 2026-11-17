@@ -1,3 +1,4 @@
+import { ZONE_FAVORITES_KEY, zoneKey } from "../features/status/favorites";
 import { ExpandSchedule } from "../components/ExpandSchedule";
 import { Link } from "react-router-dom";
 import {
@@ -22,7 +23,7 @@ export default function DashboardPage() {
     (value) => Array.isArray(value) && value.every(isLesson),
   );
   const [favorites] = useSaved<string[]>(
-    "chacha-favorites",
+    ZONE_FAVORITES_KEY,
     [],
     (value) =>
       Array.isArray(value) && value.every((item) => typeof item === "string"),
@@ -117,7 +118,7 @@ export default function DashboardPage() {
               <strong>{place.label}</strong>
               <small>{place.items.length}개 구역 살펴보기</small>
             </span>
-            {favorites.includes(place.id) ? (
+            {place.items.some(item => favorites.includes(zoneKey(place.id, item.id))) ? (
               <IconStar size={18} className="saved-star" />
             ) : (
               <IconChevronRight size={18} />

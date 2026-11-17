@@ -1,23 +1,30 @@
 import type { StatusData } from "../features/status/types";
-import { floorZones, zoneLabels, zoneLevel } from "../features/status/zones";
+import {
+  zoneLabels,
+  zoneLevel,
+  type FloorPlanDef,
+} from "../features/status/zones";
 
 export function FloorPlan({
+  plan,
   items,
   selected,
   onSelect,
 }: {
+  plan: FloorPlanDef;
   items: StatusData[];
   selected: string | null;
   onSelect: (id: string | null) => void;
 }) {
   return (
     <div
-      className="live-floor"
+      className={`live-floor floor-plan-${plan.id}`}
       role="group"
-      aria-label="제1학생회관 구역별 혼잡도 평면도"
+      aria-label={`${plan.label} 구역별 혼잡도 평면도`}
+      style={{ aspectRatio: `${plan.width} / ${plan.height}` }}
     >
-      <div className="floor-corridor" aria-label="공용 통로" />
-      {floorZones.map((zone) => {
+      {plan.corridor && <div className="floor-corridor" aria-label="공용 통로" />}
+      {plan.zones.map((zone) => {
         const item = items.find((item) => (item.zoneId ?? item.id) === zone.id);
         const level = zoneLevel(item);
         return (
@@ -25,10 +32,10 @@ export function FloorPlan({
             key={zone.id}
             className={`floor-zone floor-zone-${zone.id} ${level}`}
             style={{
-              left: `${(zone.x / 293) * 100}%`,
-              top: `${(zone.y / 166) * 100}%`,
-              width: `${(zone.w / 293) * 100}%`,
-              height: `${(zone.h / 166) * 100}%`,
+              left: `${(zone.x / plan.width) * 100}%`,
+              top: `${(zone.y / plan.height) * 100}%`,
+              width: `${(zone.w / plan.width) * 100}%`,
+              height: `${(zone.h / plan.height) * 100}%`,
             }}
             disabled={!item}
             aria-label={`${zone.id} ${item?.label ?? "미연결 구역"} · ${zoneLabels[level]}`}

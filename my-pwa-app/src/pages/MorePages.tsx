@@ -29,6 +29,12 @@ import { CampusMap } from "../components/CampusMap";
 import { useSaved } from "../useSaved";
 import { fetchCategories } from "../features/status/api";
 import { useFetch } from "../features/status/useFetch";
+import {
+  ZONE_FAVORITES_KEY,
+  zoneKey,
+  isStringArray,
+} from "../features/status/favorites";
+import { zoneLevel, zoneLabels } from "../features/status/zones";
 
 export function BusPage() {
   const [direction, setDirection] = useState<"home" | "school" | null>(null);
@@ -102,15 +108,21 @@ export function BusPage() {
 export function FoodPage() {
   const { data, error, loading, refetch } = useFetch(fetchCategories);
   const [favorites] = useSaved<string[]>(
-    "chacha-favorites",
+    ZONE_FAVORITES_KEY,
     [],
-    (v) => Array.isArray(v) && v.every((x) => typeof x === "string"),
+    isStringArray,
   );
   const [searchParams] = useSearchParams();
   const [onlySaved, setOnlySaved] = useState(searchParams.get("saved") === "1");
-  const places = data?.filter(
-    (place) => !onlySaved || favorites.includes(place.id),
-  );
+
+  // 즐겨찾기한 구역을 "어느 장소의 어떤 구역인지"와 함께 모음
+  const favoriteZones =
+    data?.flatMap((place) =>
+      place.items
+        .filter((item) => favorites.includes(zoneKey(place.id, item.id)))
+        .map((item) => ({ place, item })),
+    ) ?? [];
+
   return (
     <section>
       <div className="page-heading">
@@ -138,26 +150,46 @@ export function FoodPage() {
         </p>
       )}
       <div className="place-list">
-        {places?.map((place) => (
-          <Link
-            to={`/category/${place.id}`}
-            className="place-card"
-            key={place.id}
-          >
-            <IconToolsKitchen2 />
-            <span>
-              <strong>{place.label}</strong>
-              <small>구역별 혼잡도 확인</small>
-            </span>
-            <IconChevronRight size={20} />
-          </Link>
-        ))}
+        {onlySaved
+          ? favoriteZones.map(({ place, item }) => {
+              const level = zoneLevel(item);
+              return (
+                <Link
+                  to={`/category/${place.id}`}
+                  className="place-card"
+                  key={zoneKey(place.id, item.id)}
+                >
+                  <IconStar />
+                  <span>
+                    <strong>{item.label}</strong>
+                    <small>
+                      {place.label} · {zoneLabels[level]}
+                    </small>
+                  </span>
+                  <IconChevronRight size={20} />
+                </Link>
+              );
+            })
+          : data?.map((place) => (
+              <Link
+                to={`/category/${place.id}`}
+                className="place-card"
+                key={place.id}
+              >
+                <IconToolsKitchen2 />
+                <span>
+                  <strong>{place.label}</strong>
+                  <small>구역별 혼잡도 확인</small>
+                </span>
+                <IconChevronRight size={20} />
+              </Link>
+            ))}
       </div>
-      {places?.length === 0 && (
+      {data && onlySaved && favoriteZones.length === 0 && (
         <p className="empty">
-          즐겨찾기가 비어 있어요.
+          즐겨찾는 구역이 비어 있어요.
           <br />
-          혼잡도 화면의 별을 눌러 추가하세요.
+          혼잡도 화면에서 구역을 선택한 뒤 별을 눌러 추가하세요.
         </p>
       )}
     </section>
