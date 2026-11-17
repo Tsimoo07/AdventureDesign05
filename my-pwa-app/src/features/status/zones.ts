@@ -63,7 +63,7 @@ export const floorPlans: Record<string, FloorPlanDef> = {
       { id: "1", x: 26, y: 0, w: 150, h: 67 },
       { id: "2", x: 176, y: 0, w: 40, h: 67 },
       { id: "3", x: 136, y: 67, w: 158, h: 101 },
-      { id: "4", x: 216, y: 0, w: 78, h: 68 },
+      { id: "4", x: 216, y: 0, w: 78, h: 67 },
       { id: "5", x: 86, y: 118, w: 50, h: 50 },
       { id: "6", x: 86, y: 67, w: 50, h: 51}
     ],

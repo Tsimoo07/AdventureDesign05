@@ -235,7 +235,7 @@ main {
   background: #e88b2e;
 }
 .normal {
-  background: #249e95;
+  background: #28b1a8;
 }
 .ready {
   background: #666;
@@ -1001,10 +1001,10 @@ dialog.sheet::backdrop {
   --floor-corridor: #48484d;
   --floor-border: #68686d;
   --floor-text: #ffffff;
-  --floor-normal: #197c76;
-  --floor-warning: #985619;
-  --floor-danger: #b5363b;
-  --floor-ready: #55555b;
+  --floor-normal: #27ada4;
+  --floor-warning: #e88b2e;
+  --floor-danger: #dd444c;
+  --floor-ready: #666;
   --floor-unknown: #36363b;
   position: relative;
   width: 293px;
@@ -1103,12 +1103,12 @@ dialog.sheet::backdrop {
 [data-theme="light"] .live-floor {
   --floor-base: #f0f0f2;
   --floor-corridor: #dedee3;
-  --floor-border: #909098;
-  --floor-text: #1d1d1f;
-  --floor-normal: #bce6dd;
-  --floor-warning: #f6d4a6;
-  --floor-danger: #f3babe;
-  --floor-ready: #d2d2d8;
+  --floor-border: #ffffff8b;
+  --floor-text: #ffffff;
+  --floor-normal: #2fc5bb;
+  --floor-warning: #ff9c38;
+  --floor-danger: #fc313b;
+  --floor-ready: #8f8f8f;
   --floor-unknown: #e8e8ed;
 }
 
