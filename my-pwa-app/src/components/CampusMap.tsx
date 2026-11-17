@@ -1,3 +1,4 @@
+import { isEvaluation } from "../evaluation";
 import { useEffect, useRef, useState } from "react";
 
 type Maps = {
@@ -52,7 +53,7 @@ export function CampusMap() {
   const [error, setError] = useState("");
   const [ready, setReady] = useState(false);
   const [retry, setRetry] = useState(0);
-  const key = import.meta.env.VITE_KAKAO_MAP_KEY;
+  const key = isEvaluation ? undefined : import.meta.env.VITE_KAKAO_MAP_KEY;
   useEffect(() => {
     if (!key) return;
     let cancelled = false;

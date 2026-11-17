@@ -139,3 +139,67 @@ for (const url of [
 console.log(
   "PASS: half-hour/evening lessons, legacy model, share URL validation",
 );
+
+const { koreaTime } = await import("../src/features/timetable/model.ts");
+assert.equal(koreaTime(new Date("2026-11-12T15:00:00Z")), 0);
+assert.equal(koreaTime(new Date("2026-11-13T04:30:00Z")), 13.5);
+assert.equal(koreaTime(new Date("2026-11-13T13:00:00Z")), 22);
+console.log("PASS: Korean current-time midnight, half-hour, evening");
+
+const { lessonConnections } =
+  await import("../src/features/timetable/model.ts");
+const connected = [
+  { id: "m", title: "수학", day: 0, start: 10, end: 11 },
+  { id: "t", title: "수학", day: 1, start: 10, end: 12 },
+];
+assert.deepEqual(lessonConnections(connected), [
+  { id: "m:t", title: "수학", day: 1, start: 10, end: 11 },
+]);
+assert.equal(
+  lessonConnections([connected[0], { ...connected[1], title: "영어" }]).length,
+  0,
+);
+assert.equal(
+  lessonConnections([connected[0], { ...connected[1], start: 11 }]).length,
+  0,
+);
+assert.equal(
+  lessonConnections([connected[0], { ...connected[1], day: 2 }]).length,
+  0,
+);
+console.log(
+  "PASS: adjacent same-subject joins, different subjects, non-overlap, day gaps",
+);
+
+const { spring, step, presets, clamp } =
+  await import("../src/components/motion/spring.ts");
+for (const [k, c] of Object.values(presets)) {
+  const s = spring(0, k, c);
+  s.t = 100;
+  for (let i = 0; i < 240; i++) step(s, 1 / 240);
+  s.t = -20;
+  for (let i = 0; i < 2400; i++) step(s, 1 / 240);
+  assert.ok(
+    Number.isFinite(s.x) && Math.abs(s.x + 20) < 0.001,
+    `spring ${k}/${c} settles after reversal`,
+  );
+}
+assert.equal(clamp(-1, 0, 4), 0);
+assert.equal(clamp(5, 0, 4), 4);
+assert.deepEqual(presets.dockLead, [640, 38]);
+assert.deepEqual(presets.dockTrail, [150, 16]);
+assert.deepEqual(presets.expand, [240, 21]);
+console.log(
+  "PASS: source spring constants, reversal convergence, selection bounds",
+);
+
+const { evaluationTimetable } = await import('../src/features/timetable/demo.ts');
+assert.equal(evaluationTimetable.lessons.length, 3);
+assert.ok(evaluationTimetable.lessons.every(isLesson));
+assert.ok(evaluationTimetable.lessons.some(l => l.start === 22));
+const vercel = JSON.parse(await readFile(new URL('../vercel.json', import.meta.url), 'utf8'));
+assert.equal(vercel.buildCommand, 'npm run build:demo');
+const spa = new RegExp(`^${vercel.rewrites[0].source}$`);
+for (const route of ['/','/food','/category/1','/timetable','/menu']) assert.ok(spa.test(route));
+for (const asset of ['/api/everytime','/assets/app.js','/fonts/SUIT.woff2','/sw.js']) assert.ok(!spa.test(asset));
+console.log('PASS: evaluation fixtures and Vercel SPA routing');

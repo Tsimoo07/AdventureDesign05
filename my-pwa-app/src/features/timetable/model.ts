@@ -40,3 +40,26 @@ export function shareIdentifier(input: string) {
     throw new Error("에브리타임 공개 시간표 링크를 입력해 주세요.");
   return match[1];
 }
+
+export function koreaTime(date: Date) {
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Seoul",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(date);
+  return (
+    Number(parts.find((p) => p.type === "hour")?.value) +
+    Number(parts.find((p) => p.type === "minute")?.value) / 60
+  );
+}
+
+export function lessonConnections(lessons: Lesson[]) {
+  return lessons.flatMap(left => lessons.filter(right =>
+    right.day === left.day + 1 && right.title.trim() === left.title.trim() &&
+    Math.max(left.start, right.start) < Math.min(left.end, right.end)
+  ).map(right => ({
+    id: `${left.id}:${right.id}`, title: left.title.trim(), day: right.day,
+    start: Math.max(left.start, right.start), end: Math.min(left.end, right.end),
+  })));
+}

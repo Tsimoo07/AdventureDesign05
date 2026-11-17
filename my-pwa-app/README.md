@@ -1,4 +1,4 @@
-# 여기, 차차 · chachaMap
+# 밥길 · bapgil
 
 Figma `02 How to make`의 `Examples/` 모바일 화면을 기반으로 만든 React + TypeScript + Vite PWA입니다. SUIT Variable 폰트와 `@tabler/icons-react` 아이콘을 사용합니다.
 
@@ -103,3 +103,60 @@ API: `GET /categories`, `GET /categories/:id`. 각 category는 문자열 `id`, `
 `npm run dev`와 `npm run preview`에는 서버 미들웨어가 연결됩니다. **dist만 정적 호스팅하면 링크 가져오기는 동작하지 않습니다.** 운영 서버에 `server/everytime.ts`의 `/api/everytime` 핸들러를 연결하고 HTTPS 및 요청 제한을 적용해야 합니다. 공유 URL·응답은 서버에 저장하거나 로그로 남기지 않습니다.
 
 시간표는 30분 격자, 24시까지 표시하며 주말 수업이 있으면 주말 열도 표시합니다. 기존 정각 수업 저장 형식은 유지합니다. 시간 미지정 과목은 별도 목록에 보관합니다.
+
+### 밥길 모션 컴포넌트
+
+- 식사 화면의 학생회관 선택: Spring dropdown. 방향키로 항목 이동, Enter 선택, Escape 닫기.
+- 하단 메뉴: Rubber dock. 클릭 또는 좌우 드래그로 이동하고, 현재 메뉴를 다시 누르면 안내가 펼쳐집니다.
+- 홈의 오늘의 시간표: Expand card. 누르면 오늘 수업과 시간표 열기 링크가 펼쳐집니다.
+
+원본: [Spring dropdown](https://designbookmark.com/motion-src/spring-dropdown/index.html),
+[Rubber dock](https://designbookmark.com/motion-src/rubber-dock/index.html),
+[Expand card](https://designbookmark.com/motion-src/expand-card/index.html).
+`src/components/motion/spring.ts`는 원본 `shared/motion.js`의 4회 적분 방식과
+`shared/tokens.css` 및 컴포넌트 JS의 stiffness/damping 값을 유지합니다.
+기존 화면에 맞춰 독 너비는 유지하고 안내 패널은 높이로 펼칩니다.
+자동 시연은 없으며, 동작 줄이기 설정에서는 즉시 전환합니다. 추가 의존성은 없습니다.
+
+### 설정 Stack Panel
+
+메뉴 → 설정 → 프로필 / 화면 모드에서 사용합니다. 상단 뒤로 버튼, Escape,
+오른쪽 스와이프로 이전 설정으로 돌아갑니다. 기존 프로필 저장과 화면 모드
+툴팁을 연결했습니다. 밥길의 SUIT·테마 색·둥근 모서리를 사용합니다.
+
+[Kokonut UI Stack Panel](https://kokonutui.com/docs/navigation/stack-panel)의
+MIT 소스를 일반 CSS와 Tabler 아이콘으로 이식했습니다. Motion의 원본
+진입 0.42초, 복귀 0.34초, 높이 0.38초 및 0.3 패럴랙스를 유지합니다.
+저작권 고지: `licenses/kokonut-ui-MIT.txt`.
+
+## 형성평가용 Vercel 데모 배포
+
+1. 이 변경이 포함된 저장소/브랜치를 Vercel에서 Import합니다.
+2. **Root Directory를 `my-pwa-app`으로 설정**합니다. Framework는 Vite입니다.
+3. `vercel.json`의 Build Command `npm run build:demo`, Output Directory `dist`를 사용합니다.
+4. 별도 API·비밀키 없이 배포합니다. 평가 빌드는 혼잡도 예시 모드를 강제로 사용합니다.
+5. 배포 URL에서 `/food`, `/category/1`, `/timetable`, `/menu`를 직접 열고 새로고침해 404가 없는지 확인합니다.
+6. 참가자가 로그인 없이 접속할 수 있는 링크인지 별도 브라우저에서 확인한 뒤 URL/QR을 배포합니다.
+
+`npm run build:demo && npm run preview`로 로컬에서도 같은 빌드를 확인할 수 있습니다.
+배포 설정 참고: https://vercel.com/docs/frameworks/frontend/vite
+
+평가 모드는 상단에 예시 데이터 안내를 표시하고 초기 프로필을 ‘체험 참여자’로 표시합니다.
+시간표는 빈 상태로 시작합니다. 링크 아이콘 → ‘예시 시간표 불러오기’ → 미리보기 → 확인 후 교체 순서로
+가상 수업 3개를 가져올 수 있습니다. 실제 에브리타임 URL을 입력하거나 서버로 전송하지 않습니다.
+일반 `npm run build`/개발 모드의 실제 링크 가져오기는 기존대로 유지되며 별도 서버가 필요합니다.
+
+학생 답변을 서버에 저장하는 설문 기능은 포함하지 않습니다. 저장한 수업·프로필·즐겨찾기는 브라우저에 남습니다.
+공용 기기는 참여자마다 새 브라우저 프로필을 사용하세요. 기존 데이터가 있으면 빈 상태로 시작하지 않습니다.
+버스 도착 정보는 예시이고, 카카오 키가 없으면 내장 지도 대신 외부 지도 링크를 제공합니다.
+평가 빌드는 지도 키가 설정되어 있어도 외부 지도 링크만 제공합니다. 외부 지도 이동은 오프라인에서 동작하지 않습니다.
+평가 기간에는 빌드를 고정하세요. 새 빌드가 보이지 않으면 서비스 워커 갱신 후 새로고침이 필요할 수 있습니다.
+
+평가 자료는 저장소 `docs/evaluation/`에 있습니다:
+- `plan-review.html`: 비대면 체험 안내·과제·분석 계획
+- `feedback-form.html`: 학생 의견지 (자동 저장/전송 없음, 인쇄/PDF 저장)
+- `survey-copy.txt`: Google Forms·네이버 폼에 복사할 문항과 설정
+
+현재는 배포 준비 및 로컬 빌드 검증 상태입니다. Vercel 실제 배포 URL·휴대폰 설치·공유 링크 접근성은 배포 후 확인해야 합니다.
+
+평가는 직접 관찰 없이 3가지 핵심 과제 체험 + 약 1분 설문으로 진행합니다. 온라인 설문은 별도 서비스에서 생성해 공유해야 합니다.

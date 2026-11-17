@@ -1,3 +1,4 @@
+import { ExpandSchedule } from "../components/ExpandSchedule";
 import { Link } from "react-router-dom";
 import {
   IconArrowUpRight,
@@ -5,14 +6,13 @@ import {
   IconCalendarMonth,
   IconChevronRight,
   IconMapPin,
-  IconSearch,
   IconStar,
   IconToolsKitchen2,
 } from "@tabler/icons-react";
 import { fetchCategories, isDemo } from "../features/status/api";
 import { useFetch } from "../features/status/useFetch";
 import { useSaved } from "../useSaved";
-import { isLesson, formatTime, type Lesson } from "../features/timetable/model";
+import { isLesson, type Lesson } from "../features/timetable/model";
 
 export default function DashboardPage() {
   const { data, loading, error, refetch } = useFetch(fetchCategories);
@@ -46,10 +46,7 @@ export default function DashboardPage() {
     <section className="dashboard">
       <header className="dashboard-header">
         <Link className="wordmark" to="/">
-          여기, 차차<span>chachaMap</span>
-        </Link>
-        <Link className="round" to="/search" aria-label="장소 검색">
-          <IconSearch size={25} />
+          밥길<span>bapgil</span>
         </Link>
       </header>
       <div className="dashboard-greeting">
@@ -57,13 +54,14 @@ export default function DashboardPage() {
         <h1>
           오늘의 캠퍼스,
           <br />
-          한눈에 차차.
+          한눈에 밥길.
         </h1>
       </div>
       <Link className="dashboard-hero" to="/food">
         <div className="hero-orb" aria-hidden="true" />
         <span className="hero-kicker">
-          <IconToolsKitchen2 size={17} /> CAMPUS DINING
+          <IconToolsKitchen2 size={17} />{" "}
+          {isDemo ? "학생회관 · 예시 혼잡도" : "학생회관 혼잡도"}
         </span>
         <h2>
           밥 먹으러 가기 전,
@@ -95,45 +93,7 @@ export default function DashboardPage() {
           <span>즐겨찾기</span>
         </Link>
       </div>
-      <div className="dashboard-section-heading">
-        <h2>오늘의 시간표</h2>
-        <Link to="/timetable" aria-label="전체 시간표 보기">
-          <IconChevronRight size={21} />
-        </Link>
-      </div>
-      <div className="dashboard-schedule">
-        {todayLessons.length ? (
-          todayLessons.map((lesson) => (
-            <Link key={lesson.id} to="/timetable" className="dashboard-lesson">
-              <span>
-                {formatTime(lesson.start)}
-                <small>{formatTime(lesson.end)}</small>
-              </span>
-              <strong>{lesson.title}</strong>
-              <IconChevronRight size={18} />
-            </Link>
-          ))
-        ) : (
-          <Link to="/timetable" className="dashboard-empty">
-            <span className="dashboard-calendar">
-              <IconCalendarMonth size={25} />
-            </span>
-            <span>
-              <strong>
-                {lessons.length
-                  ? "오늘은 등록된 수업이 없어요"
-                  : "나만의 시간표를 채워보세요"}
-              </strong>
-              <small>
-                {lessons.length
-                  ? "잠깐의 여유, 캠퍼스에서 즐겨요."
-                  : "수업을 추가하면 여기에 모아드려요."}
-              </small>
-            </span>
-            <IconChevronRight size={18} />
-          </Link>
-        )}
-      </div>
+      <ExpandSchedule lessons={todayLessons} />
       <div className="dashboard-section-heading">
         <h2>캠퍼스 둘러보기</h2>
         <span>{isDemo ? "예시 정보" : "식사 공간"}</span>

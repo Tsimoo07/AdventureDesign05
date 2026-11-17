@@ -1,9 +1,10 @@
+import { isEvaluation } from "../../evaluation";
 import type { Category } from "./types";
 import { demoCategories } from "./demo";
 import { isCategory } from "./validate";
 
 const BASE_URL = import.meta.env.VITE_API_URL?.replace(/\/$/, "") ?? "";
-export const isDemo = import.meta.env.VITE_USE_DEMO !== "false";
+export const isDemo = isEvaluation || import.meta.env.VITE_USE_DEMO !== "false";
 
 async function request(path: string, signal?: AbortSignal): Promise<unknown> {
   const res = await fetch(`${BASE_URL}${path}`, {

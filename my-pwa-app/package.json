@@ -8,10 +8,12 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "test": "node scripts/check.mjs"
+    "test": "node scripts/check.mjs",
+    "build:demo": "tsc -b && vite build --mode evaluation"
   },
   "dependencies": {
     "@tabler/icons-react": "^3.51.0",
+    "motion": "^12.43.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "react-router-dom": "^7.18.5"

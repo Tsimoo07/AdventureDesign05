@@ -1,4 +1,4 @@
-# 여기, 차차 · chachaMap
+# 밥길 · bapgil
 
 충남대학교 어드벤처디자인 5조의 캠퍼스 생활 안내 PWA입니다. React·TypeScript·Vite 기반으로 SUIT 폰트와 Tabler 아이콘을 사용합니다.
 

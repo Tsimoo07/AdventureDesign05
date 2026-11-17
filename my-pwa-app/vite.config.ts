@@ -24,8 +24,8 @@ export default defineConfig({
         navigateFallbackDenylist: [/^\/api(?:\/|$)/, /^\/categories(?:\/|$)/],
       },
       manifest: {
-        name: "여기, 차차 · chachaMap",
-        short_name: "여기, 차차",
+        name: "밥길 · bapgil",
+        short_name: "밥길",
         description: "충남대학교 식사 공간 혼잡도와 캠퍼스 생활 안내",
         theme_color: "#131313",
         background_color: "#131313",

@@ -1,0 +1,74 @@
+.morph-theme {
+  position: relative;
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  margin-top: 52px;
+  border-radius: 16px;
+  background: var(--field);
+  isolation: isolate;
+}
+.morph-theme button {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-width: 0;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 12px;
+  font-size: 13px;
+}
+.morph-theme button[aria-pressed="true"] {
+  background: var(--accent);
+  color: #fff;
+}
+.morph-highlight {
+  position: absolute;
+  left: 0;
+  top: 4px;
+  height: 44px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--accent-text) 16%, transparent);
+  opacity: 0;
+  pointer-events: none;
+}
+.morph-tip {
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 12px);
+  height: 34px;
+  border-radius: 10px;
+  background: var(--ink);
+  color: var(--page);
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+  transform-origin: 50% 140%;
+}
+.morph-label {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 0 12px;
+  opacity: 0;
+}
+.morph-tail {
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 9px);
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  background: var(--ink);
+  pointer-events: none;
+  opacity: 0;
+}

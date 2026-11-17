@@ -1,11 +1,7 @@
+import { SpringDropdown } from "../components/SpringDropdown";
 import { useCallback, useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
-import {
-  IconChevronLeft,
-  IconChevronDown,
-  IconRefresh,
-  IconStar,
-} from "@tabler/icons-react";
+import { Link, useParams, useNavigate } from "react-router-dom";
+import { IconChevronLeft, IconRefresh, IconStar } from "@tabler/icons-react";
 import { fetchCategory, isDemo } from "../features/status/api";
 import { useFetch } from "../features/status/useFetch";
 import { FloorPlan } from "../components/FloorPlan";
@@ -13,6 +9,7 @@ import { zoneLevel, zoneLabels } from "../features/status/zones";
 import { useSaved } from "../useSaved";
 
 export default function CategoryPage() {
+  const navigate = useNavigate();
   const { id = "1" } = useParams<{ id: string }>();
   const fetcher = useCallback(
     (signal: AbortSignal) => fetchCategory(id, signal),
@@ -40,11 +37,16 @@ export default function CategoryPage() {
         <Link to="/food/places" className="round purple" aria-label="장소 목록">
           <IconChevronLeft size={30} />
         </Link>
-        <Link to="/food/places" className="detail-title">
-          <h1>{data?.label ?? "장소"} 혼잡도</h1>
-          <IconChevronDown size={24} />
-        </Link>
+        <SpringDropdown
+          value={id}
+          options={[
+            { id: "1", label: "제 1 학생회관" },
+            { id: "2", label: "제 2 학생회관" },
+          ]}
+          onChange={(value) => navigate(`/category/${value}`)}
+        />
       </header>
+      <h1 className="congestion-heading">구역별 혼잡도</h1>
       <p className="timestamp">
         {isDemo
           ? "10/1 13:28 KST · 예시 데이터"

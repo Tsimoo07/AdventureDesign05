@@ -1,0 +1,209 @@
+/* Kokonut UI Stack Panel, MIT. Tailwind presentation adapted to Bapgil tokens. */
+.stack-panel {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border: 0;
+  border-radius: 24px;
+  background: var(--surface);
+  color: var(--ink);
+  margin: 20px 0;
+}
+.stack-header {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  height: 52px;
+  padding: 0 8px;
+  border-bottom: 0;
+  background: var(--surface);
+}
+.stack-title {
+  position: absolute;
+  inset-inline: 0;
+  top: 50%;
+  margin-inline: auto;
+  width: fit-content;
+  max-width: 55%;
+  translate: 0 -50%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+  pointer-events: none;
+}
+.stack-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 8px 12px 16px;
+}
+.stack-section-title {
+  margin: 0 0 6px;
+  padding: 0 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+}
+.stack-rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border-radius: 14px;
+  background: var(--field);
+}
+.stack-rows > li + li {
+  border-top: 0;
+}
+.stack-footer {
+  margin: 6px 0 0;
+  padding: 0 12px;
+  font-size: 12px;
+  line-height: 20px;
+  color: var(--muted);
+}
+.stack-label {
+  min-width: 0;
+  flex: 1;
+  text-align: left;
+  font-size: 15px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.stack-label:empty {
+  display: none;
+}
+.stack-danger {
+  color: #dc454b;
+}
+.stack-ink {
+  color: var(--ink);
+}
+.stack-detail {
+  max-width: 45%;
+  flex-shrink: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+  color: var(--muted);
+}
+.stack-check,
+.stack-chevron,
+.stack-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+.stack-check {
+  color: var(--accent-text);
+}
+.stack-chevron {
+  margin-right: -4px;
+  color: var(--muted);
+}
+.stack-invisible {
+  visibility: hidden;
+}
+.stack-row {
+  display: flex;
+  min-height: 48px;
+  width: 100%;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: none;
+  font: inherit;
+  color: var(--ink);
+}
+.stack-interactive {
+  transition: background-color 0.15s;
+}
+.stack-interactive:hover,
+.stack-interactive:active {
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
+}
+.stack-interactive:focus-visible,
+.stack-back:focus-visible {
+  outline: 2px solid var(--accent-text);
+  outline-offset: -2px;
+}
+.stack-back {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  max-width: 30%;
+  min-height: 44px;
+  border-radius: 8px;
+  padding: 6px 8px 6px 4px;
+  background: none;
+  color: var(--accent-text);
+  font: inherit;
+  font-size: 14px;
+}
+.stack-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.stack-body {
+  position: relative;
+}
+.stack-under {
+  pointer-events: none;
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+}
+.stack-shade {
+  position: absolute;
+  inset: 0;
+  background: #000;
+}
+.stack-top {
+  position: relative;
+  background: var(--surface);
+  touch-action: pan-y;
+}
+.stack-switch {
+  position: relative;
+  height: 22px;
+  width: 36px;
+  flex-shrink: 0;
+  border-radius: 999px;
+  transition: background-color 0.2s;
+}
+.stack-on {
+  background: var(--accent);
+}
+.stack-off {
+  background: var(--line);
+}
+.stack-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.2s cubic-bezier(0.23, 1, 0.32, 1);
+}
+.stack-shift {
+  transform: translateX(14px);
+}
+.stack-theme {
+  width: 100%;
+  min-width: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .stack-panel * {
+    transition: none !important;
+  }
+}

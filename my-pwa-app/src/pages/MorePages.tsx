@@ -1,4 +1,10 @@
+import { isEvaluation } from "../evaluation";
+import { evaluationTimetable } from "../features/timetable/demo";
+import { StackPanel } from "../components/StackPanel";
+import { MorphThemePicker } from "../components/MorphThemePicker";
 import {
+  lessonConnections,
+  koreaTime,
   isLesson,
   formatTime,
   shareIdentifier,
@@ -20,7 +26,6 @@ import {
   IconToolsKitchen2,
 } from "@tabler/icons-react";
 import { CampusMap } from "../components/CampusMap";
-import { SearchHeader } from "../components/SearchHeader";
 import { useSaved } from "../useSaved";
 import { fetchCategories } from "../features/status/api";
 import { useFetch } from "../features/status/useFetch";
@@ -29,8 +34,10 @@ export function BusPage() {
   const [direction, setDirection] = useState<"home" | "school" | null>(null);
   return (
     <section>
-      <SearchHeader />
-      <p className="eyebrow bus-label">버스 안내 · 예시 데이터</p>
+      <div className="page-heading">
+        <h1>버스</h1>
+        <p>버스 안내 · 예시 데이터</p>
+      </div>
       <div className="commute-card">
         <button
           onClick={() => setDirection("home")}
@@ -106,7 +113,6 @@ export function FoodPage() {
   );
   return (
     <section>
-      <SearchHeader />
       <div className="page-heading">
         <h1>오늘, 어디서 먹을까요?</h1>
         <p>식사 공간을 확인하고 나에게 맞게 선택하세요</p>
@@ -160,6 +166,16 @@ export function FoodPage() {
 
 const days = ["월", "화", "수", "목", "금", "토", "일"];
 export function TimetablePage() {
+  const [now, setNow] = useState(() => koreaTime(new Date()));
+  useEffect(() => {
+    const update = () => setNow(koreaTime(new Date()));
+    const timer = window.setInterval(update, 15000);
+    document.addEventListener("visibilitychange", update);
+    return () => {
+      window.clearInterval(timer);
+      document.removeEventListener("visibilitychange", update);
+    };
+  }, []);
   const [lessons, save, saveError] = useSaved<Lesson[]>(
     "chacha-lessons",
     [],
@@ -178,7 +194,11 @@ export function TimetablePage() {
     [],
     (v) => Array.isArray(v) && v.every((x) => typeof x === "string"),
   );
-  const firstHour = Math.min(8, ...lessons.map((l) => Math.floor(l.start)));
+  const firstHour = Math.min(
+    8,
+    Math.floor(now),
+    ...lessons.map((l) => Math.floor(l.start)),
+  );
   const dayCount = lessons.some((l) => l.day > 4) ? 7 : 5;
   const [editing, setEditing] = useState<Lesson | null>(null);
   const [error, setError] = useState("");
@@ -188,7 +208,6 @@ export function TimetablePage() {
   }, [editing?.id]);
   return (
     <section>
-      <SearchHeader />
       <div className="timetable-title">
         <h1>내 시간표</h1>
         <div className="timetable-actions">
@@ -226,6 +245,11 @@ export function TimetablePage() {
           : "등록된 수업 없음 · + 버튼으로 수업 추가"}
       </p>
       <div id="timetable-import" hidden={!importOpen}>
+        {isEvaluation ? <div className="notice">
+          <h2>시간표 가져오기 체험</h2>
+          <p>실제 에브리타임에 연결하지 않습니다. 개인 링크 대신 가상 수업 3개로 미리보기와 저장을 체험하세요.</p>
+          <button className="primary" onClick={() => { setImportError(""); setPreview(evaluationTimetable); }}>예시 시간표 불러오기</button>
+        </div> : (
         <form
           className="profile-form"
           onSubmit={async (e) => {
@@ -285,6 +309,7 @@ export function TimetablePage() {
             공개 시간표를 가져와 이 기기에 저장합니다. 자동 갱신되지 않아요.
           </small>
         </form>
+        )}
         {importError && <p role="alert">{importError}</p>}
         {preview && (
           <div className="notice">
@@ -329,7 +354,17 @@ export function TimetablePage() {
       {untimed.length > 0 && (
         <p className="notice">시간 미지정: {untimed.join(", ")}</p>
       )}
-      <div className="timetable">
+      <div
+        className="timetable"
+        role="region"
+        aria-label="주간 시간표"
+        tabIndex={0}
+        style={
+          {
+            "--timetable-width": `${42 + dayCount * 58}px`,
+          } as React.CSSProperties
+        }
+      >
         <div
           className="weekdays"
           style={{ gridTemplateColumns: `42px repeat(${dayCount}, 1fr)` }}
@@ -349,13 +384,22 @@ export function TimetablePage() {
             className="calendar-grid"
             style={{ height: (24 - firstHour) * 60 }}
           >
+            {now >= firstHour && now < 24 && (
+              <div
+                className="current-time-line"
+                style={{ top: (now - firstHour) * 60 }}
+                aria-label={`현재 한국시간 ${formatTime(now)}`}
+              >
+                <span>{formatTime(now)}</span>
+              </div>
+            )}
             {lessons.map((lesson) => (
               <button
                 className="lesson"
                 key={lesson.id}
                 style={{
-                  backgroundColor: `hsl(${(subjectTitles.indexOf(lesson.title.trim()) * 137.508 + 255) % 360} 34% 27%)`,
-                  borderColor: `hsl(${(subjectTitles.indexOf(lesson.title.trim()) * 137.508 + 255) % 360} 40% 48%)`,
+                  backgroundColor: `color-mix(in srgb, var(--ink) ${8 + (subjectTitles.indexOf(lesson.title.trim()) % 7) * 3}%, var(--surface))`,
+                  borderColor: "var(--line)",
                   left: `${(lesson.day * 100) / dayCount}%`,
                   width: `${100 / dayCount}%`,
                   top: (lesson.start - firstHour) * 60,
@@ -371,6 +415,19 @@ export function TimetablePage() {
                   {formatTime(lesson.start)}–{formatTime(lesson.end)}
                 </small>
               </button>
+            ))}
+            {lessonConnections(lessons).map((join) => (
+              <span
+                key={join.id}
+                className="lesson-connection"
+                aria-hidden="true"
+                style={{
+                  left: `calc(${(join.day * 100) / dayCount}% - 1px)`,
+                  top: (join.start - firstHour) * 60 + 1,
+                  height: (join.end - join.start) * 60 - 2,
+                  backgroundColor: `color-mix(in srgb, var(--ink) ${8 + (subjectTitles.indexOf(join.title) % 7) * 3}%, var(--surface))`,
+                }}
+              />
             ))}
           </div>
         </div>
@@ -519,10 +576,18 @@ type InstallPrompt = Event & {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: string }>;
 };
-export function MenuPage() {
+export function MenuPage({
+  theme,
+  onThemeChange,
+  themeError,
+}: {
+  theme: "light" | "dark";
+  onThemeChange: (theme: "light" | "dark") => boolean;
+  themeError: string;
+}) {
   const [profile, save, saveError] = useSaved(
     "chacha-profile",
-    { name: "박지훈", department: "26 · 컴퓨터인공지능학부" },
+    { name: isEvaluation ? "체험 참여자" : "박지훈", department: isEvaluation ? "밥길 형성평가" : "26 · 컴퓨터인공지능학부" },
     (v) =>
       !!v &&
       typeof v === "object" &&
@@ -542,7 +607,6 @@ export function MenuPage() {
   }, []);
   return (
     <section>
-      <SearchHeader />
       <div className="profile">
         <div className="avatar" aria-hidden="true" />
         <div>
@@ -594,6 +658,78 @@ export function MenuPage() {
         </form>
       )}
       {saveError && <p role="alert">{saveError}</p>}
+      <StackPanel
+        root="settings"
+        pages={{
+          settings: {
+            title: "설정",
+            sections: [
+              {
+                rows: [
+                  {
+                    id: "profile",
+                    label: "프로필",
+                    detail: profile.name,
+                    to: "profile",
+                  },
+                  {
+                    id: "appearance",
+                    label: "화면 모드",
+                    detail: theme === "light" ? "라이트" : "다크",
+                    to: "appearance",
+                  },
+                ],
+              },
+            ],
+          },
+          profile: {
+            title: "프로필",
+            sections: [
+              {
+                rows: [
+                  { id: "name", label: "이름", detail: profile.name },
+                  {
+                    id: "department",
+                    label: "학번 · 학과",
+                    detail: profile.department,
+                  },
+                  {
+                    id: "edit",
+                    label: "프로필 수정",
+                    onSelect: () => setEditing(true),
+                  },
+                ],
+                footer: "프로필은 이 기기에 저장됩니다.",
+              },
+            ],
+          },
+          appearance: {
+            title: "화면 모드",
+            sections: [
+              {
+                rows: [
+                  {
+                    id: "theme",
+                    label: "",
+                    trailing: (
+                      <div className="stack-theme">
+                        <MorphThemePicker
+                          theme={theme}
+                          onChange={onThemeChange}
+                        />
+                      </div>
+                    ),
+                  },
+                ],
+                footer:
+                  themeError ||
+                  "화면 모드는 이 기기에 저장됩니다. 뒤로 버튼이나 오른쪽 스와이프로 설정 목록으로 돌아가세요.",
+              },
+            ],
+          },
+        }}
+      />
+
       <button
         className="menu-row"
         onClick={async () => {
@@ -627,7 +763,7 @@ export function MenuPage() {
         <IconChevronRight size={18} />
       </Link>
       <p className="app-info">
-        여기, 차차 <span>chachaMap</span>
+        밥길 <span>bapgil</span>
         <br />
         충남대학교 · 어드벤처디자인 5조
       </p>
