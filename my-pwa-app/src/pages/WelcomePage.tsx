@@ -59,9 +59,9 @@ export default function WelcomePage() {
       </div>
       <div className="welcome-actions">
         <Link className="welcome-primary" to="/home">
-          로그인 없이 체험하기 <IconArrowUpRight size={21} />
+          로그인 없이 시작하기 <IconArrowUpRight size={21} />
         </Link>
-        <small>혼잡도·버스는 예시 데이터로 제공됩니다.</small>
+        <small>시간표와 즐겨찾기는 이 브라우저에 저장됩니다.</small>
       </div>
       <div className="welcome-features">
         <div>

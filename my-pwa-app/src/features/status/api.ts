@@ -4,7 +4,7 @@ import { demoCategories } from "./demo";
 import { isCategory } from "./validate";
 
 const BASE_URL = import.meta.env.VITE_API_URL?.replace(/\/$/, "") ?? "";
-export const isDemo = isEvaluation || import.meta.env.VITE_USE_DEMO !== "false";
+export const isDemo = isEvaluation || import.meta.env.VITE_USE_DEMO === "true";
 
 async function request(path: string, signal?: AbortSignal): Promise<unknown> {
   const res = await fetch(`${BASE_URL}${path}`, {
@@ -21,6 +21,7 @@ export async function fetchCategories(
   signal: AbortSignal,
 ): Promise<Category[]> {
   if (isDemo) return demoCategories;
+  if (!BASE_URL) return demoCategories.map(({ id, label }) => ({ id, label, items: [] }));
   const data = await request("/categories", signal);
   if (!Array.isArray(data) || !data.every(isCategory))
     throw new Error("잘못된 장소 데이터입니다.");
@@ -31,6 +32,11 @@ export async function fetchCategory(
   id: string,
   signal: AbortSignal,
 ): Promise<Category> {
+  if (!isDemo && !BASE_URL) {
+    const place = demoCategories.find((category) => category.id === id);
+    if (!place) throw new Error("존재하지 않는 장소입니다.");
+    return { id: place.id, label: place.label, items: [] };
+  }
   const data = isDemo
     ? demoCategories.find((category) => category.id === id)
     : await request(`/categories/${encodeURIComponent(id)}`, signal);

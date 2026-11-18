@@ -32,7 +32,7 @@ export default function LoginPage() {
         <p>
           현재는 로그인 화면을 미리 볼 수 있어요.
           <br />
-          계정 없이 모든 데모 기능을 체험할 수 있습니다.
+          계정 없이 시간표와 즐겨찾기를 이용할 수 있습니다.
         </p>
       </div>
       <button
@@ -41,7 +41,7 @@ export default function LoginPage() {
         aria-describedby="login-status"
         onClick={() =>
           setMessage(
-            "Google 로그인은 아직 연결되지 않았어요. 아래에서 로그인 없이 체험해 주세요.",
+            "Google 로그인은 아직 연결되지 않았어요. 아래에서 로그인 없이 시작해 주세요.",
           )
         }
       >

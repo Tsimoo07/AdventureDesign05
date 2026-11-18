@@ -162,15 +162,14 @@ main {
   white-space: nowrap;
 }
 .timestamp {
-  margin: 3px 0 32px 60px;
+  margin: 4px 0 16px;
   color: var(--muted);
-  font-size: 18px;
-  line-height: 25px;
+  font-size: 13px;
+  line-height: 1.45;
 }
 .congestion-panel {
   background: var(--surface);
   border-radius: 32px;
-  min-height: 454px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -192,6 +191,9 @@ main {
   width: 100%;
   max-width: 280px;
   column-gap: 10px;
+}
+.zone-list:empty {
+  display: none;
 }
 .zone {
   display: flex;
@@ -666,10 +668,6 @@ form select {
   }
   .detail-header {
     gap: 8px;
-  }
-  .timestamp {
-    font-size: 15px;
-    margin-left: 56px;
   }
   .congestion-panel {
     padding-inline: 12px;

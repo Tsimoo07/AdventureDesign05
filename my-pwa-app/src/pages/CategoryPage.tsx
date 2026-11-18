@@ -21,7 +21,11 @@ export default function CategoryPage() {
     (signal: AbortSignal) => fetchCategory(id, signal),
     [id],
   );
-  const { data, loading, error, refetch } = useFetch(fetcher);
+  const result = useFetch(fetcher);
+  const { loading, error, refetch } = result;
+  const data = result.data?.id === id ? result.data : undefined;
+  const measured = data?.items.filter(item => item.status !== "ready") ?? [];
+  const average = measured.length ? measured.reduce((sum, item) => sum + item.value, 0) / measured.length : null;
   useEffect(() => {
     if (isDemo) return;
     const timer = window.setInterval(() => {
@@ -66,14 +70,15 @@ const [favorites, setFavorites, saveError] = useSaved<string[]>(
           onChange={(value) => navigate(`/category/${value}`)}
         />
       </header>
-      <h1 className="congestion-heading">구역별 혼잡도</h1>
+      <h1 className="congestion-heading">전체 혼잡도</h1>
       <p className="timestamp">
         {isDemo
           ? "10/1 13:28 KST · 예시 데이터"
           : data?.updatedAt
             ? `${new Date(data.updatedAt).toLocaleTimeString("ko-KR", { timeZone: "Asia/Seoul" })} KST 관측`
-            : "서버 관측 시각 미제공"}
+            : !data ? "" : average === null ? "측정 정보 없음" : "측정 시각 미제공"}
       </p>
+      {average !== null && <strong>{`${average >= 80 ? "혼잡" : average >= 50 ? "보통" : "원활"} · ${Math.round(average)}% (측정 구역 평균)`}</strong>}
       {loading && !data && (
         <p role="status" className="empty">
           불러오는 중...
@@ -140,7 +145,7 @@ const [favorites, setFavorites, saveError] = useSaved<string[]>(
                   : `혼잡도 ${selectedItem.value}%`}
               </p>
             ) : (
-              <p>구역을 눌러 자세히 확인하세요</p>
+              <p>{data.items.length ? "구역을 눌러 자세히 확인하세요" : "아직 수신된 구역 정보가 없어요."}</p>
             )}
             <button
               className="round"

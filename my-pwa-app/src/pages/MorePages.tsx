@@ -38,6 +38,7 @@ import { zoneLevel, zoneLabels } from "../features/status/zones";
 
 export function BusPage() {
   const [direction, setDirection] = useState<"home" | "school" | null>(null);
+  if (!isEvaluation) return <section><div className="page-heading"><h1>버스</h1><p>캠퍼스 주변 정류장을 확인하세요.</p></div><CampusMap /><a className="text-button" href="https://map.kakao.com/link/search/충남대학교%20버스정류장" target="_blank" rel="noreferrer">카카오맵에서 정류장 찾기</a></section>;
   return (
     <section>
       <div className="page-heading">
@@ -619,7 +620,7 @@ export function MenuPage({
 }) {
   const [profile, save, saveError] = useSaved(
     "chacha-profile",
-    { name: isEvaluation ? "체험 참여자" : "박지훈", department: isEvaluation ? "밥길 형성평가" : "26 · 컴퓨터인공지능학부" },
+    { name: isEvaluation ? "체험 참여자" : "사용자", department: isEvaluation ? "밥길 형성평가" : "" },
     (v) =>
       !!v &&
       typeof v === "object" &&

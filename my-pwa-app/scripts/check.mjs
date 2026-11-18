@@ -198,7 +198,7 @@ assert.equal(evaluationTimetable.lessons.length, 3);
 assert.ok(evaluationTimetable.lessons.every(isLesson));
 assert.ok(evaluationTimetable.lessons.some(l => l.start === 22));
 const vercel = JSON.parse(await readFile(new URL('../vercel.json', import.meta.url), 'utf8'));
-assert.equal(vercel.buildCommand, 'npm run build:demo');
+assert.equal(vercel.buildCommand, 'npm run build');
 const spa = new RegExp(`^${vercel.rewrites[0].source}$`);
 for (const route of ['/','/food','/category/1','/timetable','/menu']) assert.ok(spa.test(route));
 for (const asset of ['/api/everytime','/assets/app.js','/fonts/SUIT.woff2','/sw.js']) assert.ok(!spa.test(asset));
