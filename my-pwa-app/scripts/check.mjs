@@ -203,3 +203,9 @@ const spa = new RegExp(`^${vercel.rewrites[0].source}$`);
 for (const route of ['/','/food','/category/1','/timetable','/menu']) assert.ok(spa.test(route));
 for (const asset of ['/api/everytime','/assets/app.js','/fonts/SUIT.woff2','/sw.js']) assert.ok(!spa.test(asset));
 console.log('PASS: evaluation fixtures and Vercel SPA routing');
+const { nearestServices } = await import("../src/features/nearestServices.ts");
+{
+  const a = ["route-a-out", "1", "중앙역"], b = ["route-b-out", "2", "시청"], reverse = ["route-a-in", "1", "터미널"];
+  const rows = nearestServices([{id:"far",distance:90},{id:"near",distance:10},{id:"opposite",distance:20},{id:"unknown",distance:25}],{near:[a],far:[a,b],opposite:[reverse]});
+  if(JSON.stringify(rows.map(s=>[s.id,s.services.map(r=>r[0])]))!==JSON.stringify([["near",[a[0]]],["opposite",[reverse[0]]],["unknown",[]],["far",[b[0]]]])) throw Error("Nearest directed route grouping failed");
+}

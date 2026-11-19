@@ -1,4 +1,5 @@
-import { defineConfig } from "vite";
+import { defineConfig, loadEnv } from "vite";
+import transit from "./api/transit.ts";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 
@@ -10,9 +11,13 @@ export default defineConfig({
     {
       name: "everytime-import",
       configureServer(server) {
+        const key = loadEnv(server.config.mode, process.cwd(), "KAKAO_REST_API_KEY").KAKAO_REST_API_KEY;
+        server.middlewares.use("/api/transit", (req,res) => { void transit(req,res,key); });
         server.middlewares.use(everytime);
       },
       configurePreviewServer(server) {
+        const key = loadEnv(server.config.mode, process.cwd(), "KAKAO_REST_API_KEY").KAKAO_REST_API_KEY;
+        server.middlewares.use("/api/transit", (req,res) => { void transit(req,res,key); });
         server.middlewares.use(everytime);
       },
     },

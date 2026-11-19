@@ -1,6 +1,7 @@
 import { isEvaluation } from "../evaluation";
 import { evaluationTimetable } from "../features/timetable/demo";
 import { StackPanel } from "../components/StackPanel";
+import { HomeAddressSettings } from "../components/HomeAddressSettings";
 import { MorphThemePicker } from "../components/MorphThemePicker";
 import {
   lessonConnections,
@@ -26,19 +27,21 @@ import {
   IconToolsKitchen2,
 } from "@tabler/icons-react";
 import { CampusMap } from "../components/CampusMap";
+import { CommutePlanner } from "../components/CommutePlanner";
+import { HallBadge } from "../components/HallBadge";
 import { useSaved } from "../useSaved";
-import { fetchCategories } from "../features/status/api";
+import { fetchCategories, isDemo } from "../features/status/api";
 import { useFetch } from "../features/status/useFetch";
 import {
   ZONE_FAVORITES_KEY,
   zoneKey,
   isStringArray,
 } from "../features/status/favorites";
-import { zoneLevel, zoneLabels } from "../features/status/zones";
+import { congestionSummary, zoneLevel, zoneLabels } from "../features/status/zones";
 
 export function BusPage() {
   const [direction, setDirection] = useState<"home" | "school" | null>(null);
-  if (!isEvaluation) return <section><div className="page-heading"><h1>버스</h1><p>캠퍼스 주변 정류장을 확인하세요.</p></div><CampusMap /><a className="text-button" href="https://map.kakao.com/link/search/충남대학교%20버스정류장" target="_blank" rel="noreferrer">카카오맵에서 정류장 찾기</a></section>;
+  if (!isEvaluation) return <CommutePlanner />;
   return (
     <section>
       <div className="page-heading">
@@ -179,8 +182,8 @@ export function FoodPage() {
               >
                 <IconToolsKitchen2 />
                 <span>
-                  <strong>{place.label}</strong>
-                  <small>구역별 혼잡도 확인</small>
+                  <strong className="hall-title">{place.label}<HallBadge level={congestionSummary(place.items)} /></strong>
+                  <small>전체 혼잡도{isDemo && " · 예시 데이터"}</small>
                 </span>
                 <IconChevronRight size={20} />
               </Link>
@@ -618,6 +621,7 @@ export function MenuPage({
   onThemeChange: (theme: "light" | "dark") => boolean;
   themeError: string;
 }) {
+  const [params] = useSearchParams();
   const [profile, save, saveError] = useSaved(
     "chacha-profile",
     { name: isEvaluation ? "체험 참여자" : "사용자", department: isEvaluation ? "밥길 형성평가" : "" },
@@ -693,6 +697,7 @@ export function MenuPage({
       {saveError && <p role="alert">{saveError}</p>}
       <StackPanel
         root="settings"
+        initialPage={params.get("settings")==="home" ? "home" : undefined}
         pages={{
           settings: {
             title: "설정",
@@ -705,6 +710,7 @@ export function MenuPage({
                     detail: profile.name,
                     to: "profile",
                   },
+                  { id: "home", label: "집 주소", to: "home" },
                   {
                     id: "appearance",
                     label: "화면 모드",
@@ -714,6 +720,10 @@ export function MenuPage({
                 ],
               },
             ],
+          },
+          home: {
+            title: "집 주소",
+            sections: [{ rows: [{ id: "home-address", label: "", trailing: <HomeAddressSettings /> }] }],
           },
           profile: {
             title: "프로필",

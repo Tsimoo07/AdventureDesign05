@@ -72,6 +72,7 @@ export interface StackPanelProps {
   pages: Record<string, StackPage>;
   /** The page the panel starts on. */
   root: string;
+  initialPage?: string;
   className?: string;
 }
 
@@ -262,9 +263,9 @@ function RowView({
  * page from the right while its label flies up to become the title; swipe
  * the page right, or press Back or Escape, to return.
  */
-export function StackPanel({ pages, root, className }: StackPanelProps) {
+export function StackPanel({ pages, root, initialPage, className }: StackPanelProps) {
   const reduced = useReducedMotion();
-  const [stack, setStack] = useState<string[]>([root]);
+  const [stack, setStack] = useState<string[]>(initialPage && pages[initialPage] ? [root,initialPage] : [root]);
   const [origin, setOrigin] = useState<Origin | null>(null);
   const [direction, setDirection] = useState<1 | -1>(1);
   // "auto" until the first page is measured, so the server render has a

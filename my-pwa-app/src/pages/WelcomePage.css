@@ -223,3 +223,15 @@ main.entry-main {
   font-size: 14px;
   margin-top: 16px;
 }
+.tw-grid { display: inline-grid; justify-items: start; white-space: pre; }
+.tw-grid > span { grid-area: 1 / 1; }
+.tw-selection { background: color-mix(in srgb, var(--accent) 30%, transparent); }
+.tw-size { visibility: hidden; }
+.tw-caret { position: relative; display: inline-block; width: 0; }
+.tw-bar { position: absolute; bottom: -.1em; left: .04em; height: 1.05em; width: max(2px,.08em); background: currentColor; }
+.tw-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.tw-pause { color: var(--muted); font: inherit; font-size: 13px; padding: 6px 0; }
+@media (prefers-reduced-motion: no-preference) {
+  .tw-bar[data-idle=true] { animation: kokonutui-typewriter-caret 1s linear infinite; }
+}
+@media (prefers-reduced-motion: reduce) { .tw-bar, .tw-pause { display: none; } }

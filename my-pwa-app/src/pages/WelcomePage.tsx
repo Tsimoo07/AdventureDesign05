@@ -1,4 +1,6 @@
 import { Link } from "react-router-dom";
+import Typewriter from "../components/Typewriter";
+import { useState } from "react";
 import {
   IconArrowUpRight,
   IconChevronRight,
@@ -9,6 +11,7 @@ import {
 import "./WelcomePage.css";
 
 export default function WelcomePage() {
+  const [paused, setPaused] = useState(false);
   return (
     <section className="welcome-page">
       <header className="welcome-header">
@@ -27,10 +30,10 @@ export default function WelcomePage() {
           가기 전에.
         </h1>
         <p>
-          학생회관의 구역별 혼잡도를 살펴보고
-          <br />
-          오늘의 캠퍼스 생활을 가볍게 준비하세요.
+          오늘의 캠퍼스 생활을<br />
+          <Typewriter as="span" deleteMode="select" paused={paused} sequences={["가볍게", "즐겁게", "똑똑하게"].map(text => ({ text, deleteAfter: true }))} /> 준비하세요.
         </p>
+        <button type="button" className="tw-pause" onClick={() => setPaused(!paused)}>{paused ? "문구 재생" : "문구 멈춤"}</button>
       </div>
       <div className="welcome-preview">
         <div className="welcome-preview-heading">

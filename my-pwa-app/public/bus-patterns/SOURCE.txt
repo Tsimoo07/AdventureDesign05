@@ -1,0 +1,15 @@
+Directed bus service index, South Korea
+
+Contains information from OpenStreetMap, © OpenStreetMap contributors.
+Database distributed under the Open Data Commons Open Database License (ODbL 1.0):
+https://www.openstreetmap.org/copyright
+https://opendatacommons.org/licenses/odbl/1-0/
+Input: https://download.geofabrik.de/asia/south-korea-261117.osm.pbf
+Boarding-stop locations and IDs: Ministry of Land, Infrastructure and Transport
+https://www.data.go.kr/data/15067528/fileData.do
+
+Rebuild: python scripts/index-bus-patterns.py /path/to/south-korea.osm.pbf
+Requires pyosmium. Each tuple is a directed OSM route relation ID, public route
+number and direction label. Matching uses normalized stop name and proximity;
+ambiguous matches, repeated stops, final and explicitly exit-only stops are
+excluded. Unmatched official stops remain visible without inferred services.

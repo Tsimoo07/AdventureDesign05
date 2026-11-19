@@ -1,6 +1,7 @@
 import type { StatusData } from "../features/status/types";
 import {
   zoneLabels,
+  zoneSymbol,
   zoneLevel,
   type FloorPlanDef,
 } from "../features/status/zones";
@@ -38,13 +39,13 @@ export function FloorPlan({
               height: `${(zone.h / plan.height) * 100}%`,
             }}
             disabled={!item}
-            aria-label={`${zone.id} ${item?.label ?? "미연결 구역"} · ${zoneLabels[level]}`}
+            aria-label={`${zoneSymbol(plan.id, zone.id)} ${item?.label ?? "미연결 구역"} · ${zoneLabels[level]}`}
             aria-pressed={!!item && selected === item.id}
             onClick={() =>
               item && onSelect(selected === item.id ? null : item.id)
             }
           >
-            {zone.id}
+            {zoneSymbol(plan.id, zone.id)}
           </button>
         );
       })}

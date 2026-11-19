@@ -167,15 +167,30 @@ main {
   font-size: 13px;
   line-height: 1.45;
 }
+.hall-title.hall-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
 .congestion-panel {
-  background: var(--surface);
-  border-radius: 32px;
+  background: linear-gradient(135deg, var(--surface), var(--field));
+  border-radius: 28px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 32px;
-  padding: 32px 20px;
+  gap: 24px;
+  padding: 22px;
+}
+.congestion-panel .welcome-preview-caption,
+.congestion-panel .welcome-preview-heading {
+  align-self: stretch;
+}
+.congestion-panel .live-floor :is(.floor-zone, .floor-corridor) {
+  box-sizing: border-box;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  border-radius: 7px;
 }
 .floor-plan {
   width: 303px;
@@ -209,8 +224,6 @@ main {
   outline: 1px solid var(--accent);
 }
 .zone-number {
-  border: 1.7px solid currentColor;
-  border-radius: 6px;
   min-width: 19px;
   height: 19px;
   display: grid;
@@ -342,6 +355,22 @@ main {
 .bus-label {
   margin-top: 26px;
 }
+.route-pill { display: inline-block; border-radius: 999px; padding: 3px 8px; font-size: 12px; font-weight: 700; color: white; background: #bc1212; }
+.route-pill[data-kind="마을"] { background: #007fb4; }
+.route-pill[data-kind="간선"] { background: #365ab2; }
+.route-pill:is([data-kind="외곽"], [data-kind="지선"]) { background: #278009; }
+.route-key { padding: 14px 0; }
+.route-key summary { cursor: pointer; color: var(--muted); }
+.route-key .route-pill { margin: 10px 5px 0 0; }
+.route-key .route-pill { color: var(--ink); background: color-mix(in srgb, var(--route-tint) 16%, var(--surface)); }
+.route-key { --route-tint: #da6464; }
+.route-key [data-kind="마을"] { --route-tint: #4daac1; }
+.route-key [data-kind="간선"] { --route-tint: #6089ca; }
+.route-key :is([data-kind="외곽"], [data-kind="지선"]) { --route-tint: #67a77c; }
+.commute-card .school-status { align-self: stretch; display: grid; align-content: center; border-left: 1px solid var(--field); padding-left: 16px; }
+.commute-card + .commute-planner { margin-top: 12px; }
+.commute-planner form { display: grid; gap: 10px; }
+.commute-planner input { width: 100%; padding: 12px; background: var(--field); color: var(--ink); border: 0; border-radius: 10px; font: inherit; }
 .commute-card {
   background: var(--surface);
   border-radius: 32px;
@@ -994,7 +1023,7 @@ dialog.sheet::backdrop {
     padding: 12px;
   }
 }
-.live-floor {
+.congestion-panel, .live-floor {
   --floor-base: #29292c;
   --floor-corridor: #48484d;
   --floor-border: #68686d;
@@ -1004,6 +1033,15 @@ dialog.sheet::backdrop {
   --floor-danger: #dd444c;
   --floor-ready: #666;
   --floor-unknown: #36363b;
+}
+.zone-result { width: 100%; display: flex; align-items: center; justify-content: space-between; min-height: 44px; font-size: 14px; }
+.zone-note { font-size: 13px; color: var(--muted); margin: 12px 4px; }
+@media (prefers-reduced-motion: no-preference) {
+  .zone-result[data-selected="true"] { animation: zone-reveal 200ms ease-out; }
+  @keyframes zone-reveal { from { opacity: 0; transform: translateY(4px); } }
+}
+.zone-result i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; }
+.live-floor {
   position: relative;
   width: 293px;
   max-width: 100%;
@@ -1025,10 +1063,10 @@ dialog.sheet::backdrop {
 .floor-corridor {
   position: absolute;
   left: 0;
-  top: 15.66%;
-  width: 64.85%;
-  height: 37.35%;
-  background: var(--floor-corridor);
+  top: calc(100% * 26 / 166);
+  width: calc(100% * 190 / 293);
+  height: calc(100% * 62 / 166);
+  background-color: var(--floor-corridor);
 }
 .floor-zone {
   position: absolute;
@@ -1062,6 +1100,55 @@ dialog.sheet::backdrop {
 .unknown {
   background: #45434a;
 }
+.commute-planner { display: grid; gap: 12px; margin-bottom: 16px; padding: 20px; border-radius: 24px; background: var(--surface); }
+.commute-planner label, .commute-direction { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.commute-planner select { font: inherit; color: var(--ink); background: var(--field); border: 0; border-radius: 10px; padding: 8px; }
+.commute-planner .text-button { justify-self: start; display: inline-flex; align-items: center; gap: 6px; }
+.stop-explorer { border-radius:24px; overflow:hidden; background:var(--surface); margin:12px 0; }
+.naver-canvas { height:clamp(260px,42svh,480px); }
+.stop-sheet { padding:18px; display:grid; gap:8px; }
+.stop-sheet small,.stop-sheet button span { color:var(--muted); }
+.stop-sheet a { color:var(--accent-text); }
+.stop-sheet ul { list-style:none; margin:0; padding:0; max-height:14rem; overflow:auto; }
+.stop-sheet button { width:100%; display:flex; justify-content:space-between; align-items:center; min-height:44px; padding:6px 10px; border-radius:10px; }
+.boarding-marker { display:block; width:max-content; padding:7px 12px; color:white; background:#165bbc; border-radius:16px 16px 16px 0; }
+.boarding-link { display:block; padding:14px 18px; color:var(--accent-text); }
+.stop-description { display:grid; gap:3px; min-width:0; padding-block:4px; }
+.stop-description small { font-size:0.78rem; line-height:1.45; font-weight:400; overflow-wrap:anywhere; }
+.stop-sheet button:is(:active,[aria-pressed=true]) { background:var(--field); }
+.home-settings { flex:1; min-width:0; padding:6px 0; overflow-wrap:anywhere; }
+.home-settings form,.home-settings { display:grid; gap:12px; }
+.home-settings p { margin:0; }
+.home-settings input { width:100%; min-width:0; font:inherit; color:var(--ink); background:var(--surface); padding:12px; border:0; border-radius:10px; }
+.home-settings small { color:var(--muted); line-height:1.5; }
+.home-settings button { min-height:44px; padding-inline:12px; }
+.home-settings div { display:flex; flex-wrap:wrap; gap:8px; }
+.commute-planner { overflow-wrap:anywhere; }
+.commute-card ~ .commute-direction { margin-top:20px; }
+.commute-card button[aria-expanded=true] .commute-label { color:var(--accent-text); }
+.commute-card button[aria-expanded=true] .commute-label svg:last-child { transform:rotate(180deg); }
+.bus-screen .commute-card {
+  position:relative; padding:6px; gap:0; min-height:96px; border-radius:24px;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+}
+.bus-screen .commute-card::before {
+  content:""; position:absolute; left:50%; top:20px; bottom:20px;
+  width:1px; background:var(--field); pointer-events:none;
+}
+.bus-screen .commute-card > :is(button,.school-status) {
+  display:flex; flex-direction:column; justify-content:center; align-items:stretch;
+  min-width:0; padding:12px; border:0; border-radius:18px;
+}
+.bus-screen .commute-card button:is(:active,[aria-expanded=true]) { background:var(--field); }
+.bus-screen .commute-card p { margin:8px 0 0; white-space:normal; }
+.bus-screen .commute-direction { margin:16px 4px 0; }
+.bus-screen .commute-direction .text-button { margin:0; min-height:44px; padding:8px 0 8px 10px; }
+.bus-screen .stop-explorer { margin-top:2px; }
+.bus-screen .stop-sheet ul { max-height:none; overflow:visible; }
+.bus-screen .stop-sheet button { gap:12px; padding-inline:0; text-align:start; }
+.bus-screen .stop-sheet button span { white-space:nowrap; font-variant-numeric:tabular-nums; }
+.bus-screen .stop-sheet button[aria-pressed=true] { color:var(--accent-text); box-shadow:0 0 0 4px var(--field); }
+.bus-screen .commute-planner { margin-top:8px; }
 .campus-map {
   position: relative;
   height: 340px;
@@ -1098,7 +1185,7 @@ dialog.sheet::backdrop {
 .floor-zone.danger { background: var(--floor-danger); }
 .floor-zone.ready { background: var(--floor-ready); }
 .floor-zone.unknown { background: var(--floor-unknown); }
-[data-theme="light"] .live-floor {
+[data-theme="light"] :is(.congestion-panel, .live-floor) {
   --floor-base: #f0f0f2;
   --floor-corridor: #dedee3;
   --floor-border: #ffffff8b;

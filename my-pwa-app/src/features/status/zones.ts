@@ -1,4 +1,25 @@
 import type { StatusData } from "./types";
+export function congestionSummary(items: StatusData[]) {
+  const measured = items.filter(item => item.status !== "ready");
+  if (!measured.length) return items.length ? "ready" : null;
+  const average = measured.reduce((sum, item) => sum + item.value, 0) / measured.length;
+  return average >= 80 ? "danger" : average >= 50 ? "warning" : "normal";
+}
+const zoneSymbols: Record<string, Record<string, string>> = {
+  "1": { "0": "99", "1": "K", "2": "1", "3": "2", "4": "A", "5": "B", "6": "C", "7": "GS", "8": "3", "9": "4" },
+  "2": { "0": "99", "1": "A", "2": "B", "3": "1", "4": "2", "5": "GS" },
+};
+export function zoneSymbol(hall: string, zone: string) {
+  return zoneSymbols[hall]?.[zone] ?? "–";
+}
+const displayOrder = ["1", "2", "3", "4", "K", "A", "B", "C", "99", "GS"];
+export function orderedZones(hall: string, items: StatusData[]) {
+  const rank = (item: StatusData) => {
+    const index = displayOrder.indexOf(zoneSymbol(hall, item.zoneId ?? item.id));
+    return index < 0 ? displayOrder.length : index;
+  };
+  return [...items].sort((left, right) => rank(left) - rank(right));
+}
 export const zoneLabels = {
   normal: "원활",
   warning: "보통",
