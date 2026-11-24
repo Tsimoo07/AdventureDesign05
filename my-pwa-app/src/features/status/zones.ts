@@ -7,7 +7,7 @@ export function congestionSummary(items: StatusData[]) {
 }
 const zoneSymbols: Record<string, Record<string, string>> = {
   "1": { "0": "99", "1": "K", "2": "1", "3": "2", "4": "A", "5": "B", "6": "C", "7": "GS", "8": "3", "9": "4" },
-  "2": { "0": "99", "1": "A", "2": "B", "3": "1", "4": "2", "5": "GS" },
+  "2": { "0": "99", "1": "A", "2": "B", "3": "1", "4": "2", "5": "GS","6": "K" },
 };
 export function zoneSymbol(hall: string, zone: string) {
   return zoneSymbols[hall]?.[zone] ?? "–";
