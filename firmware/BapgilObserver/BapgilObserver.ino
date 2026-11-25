@@ -28,6 +28,8 @@
 constexpr int MIN_RSSI = -127;
 constexpr int MAX_RSSI = 20;
 using RssiCounts = std::array<uint32_t, MAX_RSSI - MIN_RSSI + 1>;
+constexpr int64_t AVERAGE_WINDOW_US = AVERAGE_WINDOW_SECONDS * 1000000LL;
+constexpr int64_t SCAN_US = SCAN_SECONDS * 1000000LL;
 constexpr int64_t WINDOW_MS = OBSERVATION_SECONDS * 1000LL;
 constexpr int64_t MAX_START_DELAY_MS = 1000;
 constexpr int64_t SEND_DELAY_MS = 1000;  // Give receiver and server clocks a small margin.
@@ -35,8 +37,7 @@ constexpr int64_t MIN_VALID_UTC_MS = 1704067200000LL;  // 2024-01-01 UTC
 constexpr size_t MAX_OUTBOX = 8;
 
 struct ScanStats {
-  uint32_t count = 0;
-  RssiCounts rssiCounts{};
+  std::array<RssiCounts, AVERAGE_WINDOW_COUNT> windows{};
   int64_t startedUs = 0;
   int64_t endedUs = 0;
 };
@@ -83,9 +84,11 @@ int onGap(ble_gap_event *event, void *) {
   } else if (event->type == BLE_GAP_EVENT_DISC &&
              event->disc.event_type != BLE_HCI_ADV_RPT_EVTYPE_SCAN_RSP &&
              event->disc.rssi >= MIN_RSSI && event->disc.rssi <= MAX_RSSI) {
-    const int rssi = event->disc.rssi;
-    ++scan.count;
-    ++scan.rssiCounts[rssi - MIN_RSSI];
+    const int64_t elapsedUs = esp_timer_get_time() - scan.startedUs;
+    if (elapsedUs < SCAN_US) {
+      const size_t window = elapsedUs / AVERAGE_WINDOW_US;
+      ++scan.windows[window][event->disc.rssi - MIN_RSSI];
+    }
   }
   return 0;
 }
@@ -104,15 +107,14 @@ void enqueue(const Observation &observation) {
 }
 
 void measure(int64_t windowMs) {
-  scan = {};
+  for (auto &window : scan.windows) window.fill(0);
   gapOk = false;
   const int64_t startUtcMs = utcMs();
-  const int64_t requestUs = esp_timer_get_time();
+  scan.startedUs = esp_timer_get_time();
   if (ble_gap_disc(ownAddressType, SCAN_SECONDS * 1000, &scanParameters, onGap, nullptr) != 0) {
     Serial.println("BLE scan request failed; window skipped.");
     return;
   }
-  scan.startedUs = esp_timer_get_time();
   if (xSemaphoreTake(gapDone, pdMS_TO_TICKS((SCAN_SECONDS + 2) * 1000)) != pdTRUE) {
     Serial.println("BLE scan timed out; restarting radio.");
     delay(200);
@@ -125,7 +127,7 @@ void measure(int64_t windowMs) {
   }
 
   const int64_t endUtcMs = utcMs();
-  const int64_t requestElapsedMs = (esp_timer_get_time() - requestUs) / 1000;
+  const int64_t requestElapsedMs = (esp_timer_get_time() - scan.startedUs) / 1000;
   const uint32_t scanMs = (scan.endedUs - scan.startedUs) / 1000;
   if (startUtcMs < windowMs || endUtcMs < startUtcMs ||
       endUtcMs > windowMs + WINDOW_MS || llabs(endUtcMs - startUtcMs - requestElapsedMs) > 250 ||
@@ -133,12 +135,38 @@ void measure(int64_t windowMs) {
     Serial.println("Clock shifted or scan crossed the window; observation skipped.");
     return;
   }
-  const Observation observation{time_t(windowMs / 1000), scanMs, scan.count, scan.rssiCounts};
+  Observation observation{time_t(windowMs / 1000), scanMs, 0, {}};
+  for (const auto &window : scan.windows) {
+    for (size_t i = 0; i < window.size(); ++i) {
+      observation.count += window[i];
+      observation.rssiCounts[i] += window[i];
+    }
+  }
   if (xQueueSend(finishedWindows, &observation, 0) != pdTRUE) {
     Serial.println("Sender busy; observation dropped.");
     return;
   }
-  Serial.printf("Scan complete: %lu BLE reports.\n", (unsigned long)observation.count);
+  Serial.printf("Scan complete: %lu BLE reports (%.1f per %d s).\n",
+                (unsigned long)observation.count, double(observation.count) / AVERAGE_WINDOW_COUNT,
+                AVERAGE_WINDOW_SECONDS);
+}
+
+size_t appendRssiCounts(char *json, size_t capacity, const RssiCounts &counts, bool average) {
+  size_t length = 0;
+  const char *separator = "";
+  for (int dbm = MIN_RSSI; dbm <= MAX_RSSI; ++dbm) {
+    const uint32_t count = counts[dbm - MIN_RSSI];
+    if (!count) continue;
+    if (average) {
+      length += snprintf(json + length, capacity - length, "%s\"%d\":%.1f",
+                         separator, dbm, double(count) / AVERAGE_WINDOW_COUNT);
+    } else {
+      length += snprintf(json + length, capacity - length, "%s\"%d\":%lu",
+                         separator, dbm, (unsigned long)count);
+    }
+    separator = ",";
+  }
+  return length;
 }
 
 int postObservation(const Observation &value) {
@@ -147,21 +175,18 @@ int postObservation(const Observation &value) {
   gmtime_r(&value.start, &utc);
   strftime(start, sizeof start, "%Y-%m-%dT%H:%M:%SZ", &utc);
   // Only the transmitter task uses this buffer. Keep it off the TLS call stack.
-  // Allow up to 18 bytes per RSSI bucket, including its separator: ,"-127":4294967295
-  static char json[192 + RssiCounts{}.size() * 18];
+  // Allow 20 bytes per RSSI bucket in each map, including its separator.
+  static char json[256 + 2 * RssiCounts{}.size() * 20];
   size_t length = snprintf(json, sizeof json,
                            "{\"windowStart\":\"%s\",\"durationSec\":%d,\"scanSec\":%lu.%03lu,"
-                           "\"count\":%lu,\"configVersion\":%d,\"rssiCounts\":{",
+                           "\"count\":%lu,\"configVersion\":%d,\"averageWindowSec\":%d,"
+                           "\"averageCount\":%.1f,\"rssiCounts\":{",
                            start, OBSERVATION_SECONDS, (unsigned long)(value.scanMs / 1000),
-                           (unsigned long)(value.scanMs % 1000), (unsigned long)value.count, CONFIG_VERSION);
-  const char *separator = "";
-  for (int dbm = MIN_RSSI; dbm <= MAX_RSSI; ++dbm) {
-    const uint32_t count = value.rssiCounts[dbm - MIN_RSSI];
-    if (!count) continue;
-    length += snprintf(json + length, sizeof json - length, "%s\"%d\":%lu",
-                       separator, dbm, (unsigned long)count);
-    separator = ",";
-  }
+                           (unsigned long)(value.scanMs % 1000), (unsigned long)value.count,
+                           CONFIG_VERSION, AVERAGE_WINDOW_SECONDS, double(value.count) / AVERAGE_WINDOW_COUNT);
+  length += appendRssiCounts(json + length, sizeof json - length, value.rssiCounts, false);
+  length += snprintf(json + length, sizeof json - length, "},\"averageRssiCounts\":{");
+  length += appendRssiCounts(json + length, sizeof json - length, value.rssiCounts, true);
   memcpy(json + length, "}}", 3);
   length += 2;
 
