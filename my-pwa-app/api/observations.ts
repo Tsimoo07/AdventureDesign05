@@ -1,7 +1,7 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
+import { hasObservationCache, readHall2Observation, SCAN_WINDOWS, updateHall2Observation } from "../server/hall2-observation.ts";
 
 const MAX_BODY_BYTES = 8192;
-const SCAN_WINDOWS = 5;
 
 function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -19,7 +19,8 @@ function readObservation(body: unknown) {
   if (!Number.isFinite(timestamp.getTime()) || timestamp.toISOString() !== windowStart.replace("Z", ".000Z")) return null;
 
   if (typeof count !== "number" || !Number.isInteger(count) || count < 0 || count > 0xffffffff ||
-      averageCount !== count / SCAN_WINDOWS || !isObject(rssiCounts) || !isObject(averageRssiCounts)) return null;
+      typeof averageCount !== "number" || averageCount !== count / SCAN_WINDOWS ||
+      !isObject(rssiCounts) || !isObject(averageRssiCounts)) return null;
 
   const bins = Object.entries(rssiCounts);
   if (bins.length !== Object.keys(averageRssiCounts).length) return null;
@@ -33,7 +34,7 @@ function readObservation(body: unknown) {
   }
   if (sum !== count) return null;
 
-  return { configVersion, windowStart, scanSec, count, averageCount, averageRssiCounts };
+  return { configVersion, windowStart, durationSec, scanSec, count, averageCount, rssiCounts, averageRssiCounts };
 }
 
 export default async function observations(req: IncomingMessage & { body?: unknown }, res: ServerResponse) {
@@ -42,8 +43,16 @@ export default async function observations(req: IncomingMessage & { body?: unkno
     res.end(JSON.stringify(data));
   };
 
+  if (req.method === "GET") {
+    if (!hasObservationCache()) return send(503, { error: "observation_cache_unavailable" });
+    try {
+      return send(200, { observation: await readHall2Observation() });
+    } catch {
+      return send(503, { error: "observation_cache_unavailable" });
+    }
+  }
   if (req.method !== "POST") {
-    res.setHeader("Allow", "POST");
+    res.setHeader("Allow", "GET, POST");
     return send(405, { error: "method_not_allowed" });
   }
   if (req.headers["content-type"]?.split(";", 1)[0]?.trim().toLowerCase() !== "application/json") {
@@ -79,9 +88,24 @@ export default async function observations(req: IncomingMessage & { body?: unkno
   if (!observation) return send(400, { error: "invalid_v3_observation" });
 
   console.info("ESP32 observation received", JSON.stringify(observation));
+  let latestUpdated = false;
+  if (hasObservationCache()) {
+    if (Date.parse(observation.windowStart) + observation.durationSec * 1000 > Date.now() + 5000) {
+      return send(400, { error: "observation_in_future" });
+    }
+    try {
+      latestUpdated = await updateHall2Observation({
+        windowStart: observation.windowStart,
+        rssiCounts: observation.rssiCounts as Record<string, number>,
+      });
+    } catch {
+      return send(503, { error: "observation_cache_unavailable" });
+    }
+  }
   return send(200, {
     status: "received",
     windowStart: observation.windowStart,
     averageCount: observation.averageCount,
+    latestUpdated,
   });
 }

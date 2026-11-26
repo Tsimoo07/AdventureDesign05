@@ -1,5 +1,16 @@
 export type StatusLevel = "normal" | "warning" | "danger";
 
+export interface Hall2ZoneGroup {
+  averageCount: number;
+  level: StatusLevel;
+}
+
+export interface Hall2Observation extends Hall2ZoneGroup {
+  windowStart: string;
+  dining: Hall2ZoneGroup;
+  serving: Hall2ZoneGroup;
+}
+
 export interface StatusData {
   id: string;
   label: string;

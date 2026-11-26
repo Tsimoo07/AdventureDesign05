@@ -2,7 +2,9 @@ import { SpringDropdown } from "../components/SpringDropdown";
 import { useCallback, useEffect, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { IconChevronLeft, IconRefresh, IconStar } from "@tabler/icons-react";
-import { fetchCategory, isDemo } from "../features/status/api";
+import { fetchCategory, fetchHall2Observation, isDemo } from "../features/status/api";
+import { applyHall2Observation, isHall2SensorZone } from "../features/status/hall2";
+import { isEvaluation } from "../evaluation";
 import { useFetch } from "../features/status/useFetch";
 import { FloorPlan } from "../components/FloorPlan";
 import { HallBadge } from "../components/HallBadge";
@@ -25,14 +27,24 @@ export default function CategoryPage() {
   const result = useFetch(fetcher);
   const { loading, error, refetch } = result;
   const data = result.data?.id === id ? result.data : undefined;
-  const summary = congestionSummary(data?.items ?? []);
+  const showLive = id === "2" && !isEvaluation;
+  const liveFetcher = useCallback(
+    (signal: AbortSignal) => showLive ? fetchHall2Observation(signal) : Promise.resolve(null),
+    [showLive],
+  );
+  const { data: liveData, loading: liveLoading, error: liveError, refetch: refetchLive } = useFetch(liveFetcher);
+  const live = showLive && !liveError ? liveData : null;
+  const items = showLive ? applyHall2Observation(data?.items ?? [], live) : data?.items ?? [];
+  const summary = showLive ? live?.level ?? null : congestionSummary(items);
   useEffect(() => {
-    if (isDemo) return;
+    if (isDemo && !showLive) return;
     const timer = window.setInterval(() => {
-      if (!document.hidden) refetch();
+      if (document.hidden) return;
+      if (!isDemo) refetch();
+      if (showLive) refetchLive();
     }, 15000);
     return () => window.clearInterval(timer);
-  }, [refetch]);
+  }, [refetch, refetchLive, showLive]);
   const [selected, setSelected] = useState<string | null>(null);
 const [favorites, setFavorites, saveError] = useSaved<string[]>(
   ZONE_FAVORITES_KEY,
@@ -41,7 +53,7 @@ const [favorites, setFavorites, saveError] = useSaved<string[]>(
 );
 
   // 선택된 구역과 그 구역의 즐겨찾기 여부
-  const selectedItem = data?.items.find((item) => item.id === selected);
+  const selectedItem = items.find((item) => item.id === selected);
   const selectedKey = selectedItem ? zoneKey(id, selectedItem.id) : null;
   const selectedFavorite =
     selectedKey !== null && favorites.includes(selectedKey);
@@ -72,7 +84,11 @@ const [favorites, setFavorites, saveError] = useSaved<string[]>(
       </header>
       <h1 className="congestion-heading">전체 혼잡도</h1>
       <p className="timestamp">
-        {isDemo
+        {showLive
+          ? live
+            ? `${new Date(Date.parse(live.windowStart) + 30000).toLocaleTimeString("ko-KR", { timeZone: "Asia/Seoul" })} KST 관측`
+            : "측정 정보 없음"
+          : isDemo
           ? "10/1 13:28 KST · 예시 데이터"
           : data?.updatedAt
             ? `${new Date(data.updatedAt).toLocaleTimeString("ko-KR", { timeZone: "Asia/Seoul" })} KST 관측`
@@ -94,12 +110,19 @@ const [favorites, setFavorites, saveError] = useSaved<string[]>(
           <div className="congestion-panel">
             <div className="welcome-preview-heading">
               <strong className="hall-title">{data.label}<HallBadge level={summary} /></strong>
-              <small>{isDemo ? "예시 데이터" : "구역별 혼잡도"}</small>
+              <small>{showLive ? "ESP32 구역별 혼잡도" : isDemo ? "예시 데이터" : "구역별 혼잡도"}</small>
             </div>
+            {showLive && (
+              <p className="zone-note" role="status">
+                {liveError ? "ESP32 측정값을 불러오지 못했어요."
+                  : live ? `5초당 평균 · A/B ${live.serving.averageCount.toFixed(1)}회 · 1/2 ${live.dining.averageCount.toFixed(1)}회`
+                  : liveLoading ? "ESP32 측정값을 불러오는 중이에요." : "최근 ESP32 측정값이 없어요."}
+              </p>
+            )}
             {plan && (
               <FloorPlan
                 plan={plan}
-                items={data.items}
+                items={items}
                 selected={selected}
                 onSelect={setSelected}
               />
@@ -108,13 +131,14 @@ const [favorites, setFavorites, saveError] = useSaved<string[]>(
               <span role="status">{selectedItem ? <>
                 <i style={{ background: `var(--floor-${zoneLevel(selectedItem)})` }} />
                 {selectedItem.label} · <strong>{zoneLabels[zoneLevel(selectedItem)]}</strong>
-              </> : data.items.length ? "구역을 눌러 확인하세요" : "아직 수신된 구역 정보가 없어요."}</span>
+                {showLive && live && isHall2SensorZone(selectedItem) && ` · ${selectedItem.value.toFixed(1)}회/5초`}
+              </> : items.length ? "구역을 눌러 확인하세요" : "아직 수신된 구역 정보가 없어요."}</span>
               {selectedItem && <button className="round" aria-label={`${selectedItem.label} 즐겨찾기 ${selectedFavorite ? "해제" : "추가"}`} aria-pressed={selectedFavorite} onClick={toggleFavorite}>
                 <IconStar size={20} fill={selectedFavorite ? "currentColor" : "none"} />
               </button>}
             </div>
-            <div className="zone-list" style={{ gridTemplateRows: `repeat(${Math.max(1, Math.ceil(data.items.length / 2))}, 27px)` }}>
-              {orderedZones(id, data.items).map((item) => {
+            <div className="zone-list" style={{ gridTemplateRows: `repeat(${Math.max(1, Math.ceil(items.length / 2))}, 27px)` }}>
+              {orderedZones(id, items).map((item) => {
                 const level = zoneLevel(item);
                 const isFavorite = favorites.includes(zoneKey(id, item.id));
                 return (
@@ -153,8 +177,8 @@ const [favorites, setFavorites, saveError] = useSaved<string[]>(
             <button
               className="round"
               aria-label="혼잡도 새로고침"
-              disabled={loading}
-              onClick={refetch}
+              disabled={loading || (showLive && liveLoading)}
+              onClick={() => { refetch(); if (showLive) refetchLive(); }}
             >
               <IconRefresh size={22} className={loading ? "spin" : ""} />
             </button>
