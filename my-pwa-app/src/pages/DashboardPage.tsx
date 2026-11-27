@@ -3,8 +3,6 @@ import { ExpandSchedule } from "../components/ExpandSchedule";
 import { Link } from "react-router-dom";
 import {
   IconArrowUpRight,
-  IconBusStop,
-  IconCalendarMonth,
   IconChevronRight,
   IconMapPin,
   IconStar,
@@ -76,27 +74,9 @@ export default function DashboardPage() {
           </span>
         </span>
       </Link>
-      <div className="dashboard-shortcuts">
-        <Link to="/bus">
-          <IconBusStop />
-          <span>버스</span>
-        </Link>
-        <Link to="/food/places">
-          <IconToolsKitchen2 />
-          <span>식사 공간</span>
-        </Link>
-        <Link to="/timetable">
-          <IconCalendarMonth />
-          <span>시간표</span>
-        </Link>
-        <Link to="/food/places?saved=1">
-          <IconStar />
-          <span>즐겨찾기</span>
-        </Link>
-      </div>
       <ExpandSchedule lessons={todayLessons} />
       <div className="dashboard-section-heading">
-        <h2>캠퍼스 둘러보기</h2>
+        <h2>식당 확인하기</h2>
         <span>{isDemo ? "예시 정보" : "식사 공간"}</span>
       </div>
       <div className="dashboard-places">
