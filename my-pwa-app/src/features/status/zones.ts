@@ -52,7 +52,7 @@ export function applyThresholds(
     return { ...item, level: levelByValue(item.value, t) };
   });
 }
-import Byelidali from "../../assets/ByelidaliWhite.png";
+import Byelidali from "../../assets/Byelidali.png"; // 이미지 가져오기
 // 변경 후
 export function congestionSummary(
   items: StatusData[],
@@ -67,7 +67,7 @@ const zoneSymbols: Record<string, Record<string, string>> = {
   "1": { "0": "99", "1": "K", "2": "1", "3": "2", "4": "A", "5": "B", "6": "C", "7": "GS", "8": "3", "9": "4" },
   "2": { "0": "99", "1": "A", "2": "2", "3": "1", "4": "2", "5": "GS","6": "K" },
 };
-const symbolImages: Record<string, string> = {
+const symbolImages: Record<string, string> = { // 이미지 적용
   B : Byelidali,
 }
 // 이미지가 없는 기호는 undefined → 화면에서는 글자로 대체
