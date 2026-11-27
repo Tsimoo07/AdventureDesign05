@@ -5,6 +5,7 @@ import {
   zoneLevel,
   type FloorPlanDef,
 } from "../features/status/zones";
+import { ZoneMark } from "./ZoneMark";
 
 export function FloorPlan({
   plan,
@@ -45,7 +46,7 @@ export function FloorPlan({
               item && onSelect(selected === item.id ? null : item.id)
             }
           >
-            {zoneSymbol(plan.id, zone.id)}
+            <ZoneMark hall={plan.id} zone={zone.id} />
           </button>
         );
       })}

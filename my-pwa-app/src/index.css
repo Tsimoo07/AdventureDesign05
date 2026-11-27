@@ -1674,3 +1674,22 @@ button:active { filter: brightness(.94); }
 .evaluation-dialog p { font-size: 14px; line-height: 1.7; color: var(--muted); }
 .evaluation-dialog .evaluation-storage { margin-top: 14px; font-size: 12px; }
 .evaluation-confirm { width: 100%; min-height: 48px; margin-top: 24px; border-radius: 16px; }
+.zone-mark {
+  display: block;
+  max-width: 80%;
+  max-height: 80%;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* 구역 목록의 번호 칸(19px 원형 테두리 안) */
+.zone-number .zone-mark {
+  max-width: 13px;
+  max-height: 13px;
+}
+.floor-zone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

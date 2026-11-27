@@ -1,4 +1,5 @@
 import type { StatusData } from "./types";
+import Byelidali from "../../assets/Byelidali.png";
 export function congestionSummary(items: StatusData[]) {
   const measured = items.filter(item => item.status !== "ready");
   if (!measured.length) return items.length ? "ready" : null;
@@ -9,6 +10,13 @@ const zoneSymbols: Record<string, Record<string, string>> = {
   "1": { "0": "99", "1": "K", "2": "1", "3": "2", "4": "A", "5": "B", "6": "C", "7": "GS", "8": "3", "9": "4" },
   "2": { "0": "99", "1": "A", "2": "B", "3": "1", "4": "2", "5": "GS","6": "K" },
 };
+const symbolImages: Record<string, string> = {
+  B : Byelidali,
+}
+// 이미지가 없는 기호는 undefined → 화면에서는 글자로 대체
+export function zoneImage(hall: string, zone: string): string | undefined {
+  return symbolImages[zoneSymbol(hall, zone)];
+}
 export function zoneSymbol(hall: string, zone: string) {
   return zoneSymbols[hall]?.[zone] ?? "–";
 }
