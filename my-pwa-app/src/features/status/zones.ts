@@ -1,14 +1,71 @@
 import type { StatusData } from "./types";
-import Byelidali from "../../assets/Byelidali.png";
-export function congestionSummary(items: StatusData[]) {
+export type ThresholdSource = Thresholds | ((item: StatusData) => Thresholds);
+export type ZoneThresholdMap = Record<string, Thresholds>;
+export type ThresholdMap = Record<string, Thresholds>;
+export interface Thresholds {
+  warning: number; // 이 값 이상이면 "보통"
+  danger: number; // 이 값 이상이면 "혼잡"
+}
+
+export const DEFAULT_THRESHOLDS: Thresholds = { warning: 50, danger: 80 };
+export const THRESHOLD_STEP = 5;
+export const THRESHOLD_MIN = 0;
+export const THRESHOLD_MAX = 995;
+
+export const isThresholds = (v: unknown): v is Thresholds =>
+  typeof v === "object" &&
+  v !== null &&
+  typeof (v as Thresholds).warning === "number" &&
+  typeof (v as Thresholds).danger === "number" &&
+  (v as Thresholds).warning >= THRESHOLD_MIN &&
+  (v as Thresholds).danger <= THRESHOLD_MAX &&
+  (v as Thresholds).warning < (v as Thresholds).danger;
+
+export const isThresholdMap = (v: unknown): v is ThresholdMap =>
+  typeof v === "object" &&
+  v !== null &&
+  !Array.isArray(v) &&
+  Object.values(v).every(isThresholds);
+
+export const isZoneThresholdMap = (v: unknown): v is ZoneThresholdMap =>
+  typeof v === "object" &&
+  v !== null &&
+  !Array.isArray(v) &&
+  Object.values(v).every(isThresholds);
+
+export function levelByValue(
+  value: number,
+  t: Thresholds,
+): "normal" | "warning" | "danger" {
+  return value >= t.danger ? "danger" : value >= t.warning ? "warning" : "normal";
+}
+
+// 기준값으로 각 구역의 level을 다시 계산 (준비 중 구역과 skip 대상은 그대로)
+export function applyThresholds(
+  items: StatusData[],
+  source: ThresholdSource,
+  skip?: (item: StatusData) => boolean,
+): StatusData[] {
+  return items.map((item) => {
+    if (item.status === "ready" || skip?.(item)) return item;
+    const t = typeof source === "function" ? source(item) : source;
+    return { ...item, level: levelByValue(item.value, t) };
+  });
+}
+import Byelidali from "../../assets/ByelidaliWhite.png";
+// 변경 후
+export function congestionSummary(
+  items: StatusData[],
+  t: Thresholds = DEFAULT_THRESHOLDS,
+) {
   const measured = items.filter(item => item.status !== "ready");
   if (!measured.length) return items.length ? "ready" : null;
   const average = measured.reduce((sum, item) => sum + item.value, 0) / measured.length;
-  return average >= 80 ? "danger" : average >= 50 ? "warning" : "normal";
+  return average >= t.danger ? "danger" : average >= t.warning ? "warning" : "normal";
 }
 const zoneSymbols: Record<string, Record<string, string>> = {
   "1": { "0": "99", "1": "K", "2": "1", "3": "2", "4": "A", "5": "B", "6": "C", "7": "GS", "8": "3", "9": "4" },
-  "2": { "0": "99", "1": "A", "2": "B", "3": "1", "4": "2", "5": "GS","6": "K" },
+  "2": { "0": "99", "1": "A", "2": "2", "3": "1", "4": "2", "5": "GS","6": "K" },
 };
 const symbolImages: Record<string, string> = {
   B : Byelidali,

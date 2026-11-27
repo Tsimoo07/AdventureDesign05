@@ -37,7 +37,8 @@ import {
   zoneKey,
   isStringArray,
 } from "../features/status/favorites";
-import { congestionSummary, zoneLevel, zoneLabels } from "../features/status/zones";
+import { useThresholds } from "../features/status/useThresholds";
+import { applyThresholds, congestionSummary, zoneLevel, zoneLabels } from "../features/status/zones";
 
 export function BusPage() {
   const [direction, setDirection] = useState<"home" | "school" | null>(null);
@@ -119,9 +120,16 @@ export function FoodPage() {
   const [searchParams] = useSearchParams();
   const [onlySaved, setOnlySaved] = useState(searchParams.get("saved") === "1");
 
+  const { forHall } = useThresholds();
+
+  const places = data?.map((place) => ({
+    ...place,
+    items: applyThresholds(place.items, forHall(place.id)),
+  }));
+
   // 즐겨찾기한 구역을 "어느 장소의 어떤 구역인지"와 함께 모음
   const favoriteZones =
-    data?.flatMap((place) =>
+    places?.flatMap((place) =>
       place.items
         .filter((item) => favorites.includes(zoneKey(place.id, item.id)))
         .map((item) => ({ place, item })),
@@ -174,7 +182,7 @@ export function FoodPage() {
                 </Link>
               );
             })
-          : data?.map((place) => (
+          : places?.map((place) => (
               <Link
                 to={`/category/${place.id}`}
                 className="place-card"
@@ -182,7 +190,7 @@ export function FoodPage() {
               >
                 <IconToolsKitchen2 />
                 <span>
-                  <strong className="hall-title">{place.label}<HallBadge level={congestionSummary(place.items)} /></strong>
+                  <strong className="hall-title">{place.label}<HallBadge level={congestionSummary(place.items, forHall(place.id))} /></strong>
                   <small>전체 혼잡도{isDemo && " · 예시 데이터"}</small>
                 </span>
                 <IconChevronRight size={20} />

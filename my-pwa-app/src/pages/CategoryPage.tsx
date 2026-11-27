@@ -8,13 +8,23 @@ import { isEvaluation } from "../evaluation";
 import { useFetch } from "../features/status/useFetch";
 import { FloorPlan } from "../components/FloorPlan";
 import { HallBadge } from "../components/HallBadge";
-import { congestionSummary, floorPlans, orderedZones, zoneLevel, zoneLabels, zoneSymbol } from "../features/status/zones";
+import { ThresholdControl } from "../components/ThresholdControl";
+import {
+  applyThresholds,
+  congestionSummary,
+  floorPlans,
+  orderedZones,
+  zoneLevel,
+  zoneLabels,
+  zoneSymbol,
+} from "../features/status/zones";
 import { useSaved } from "../useSaved";
 import {
   ZONE_FAVORITES_KEY,
   zoneKey,
   isStringArray,
 } from "../features/status/favorites";
+import { useThresholds } from "../features/status/useThresholds";
 
 export default function CategoryPage() {
   const navigate = useNavigate();
@@ -34,8 +44,20 @@ export default function CategoryPage() {
   );
   const { data: liveData, loading: liveLoading, error: liveError, refetch: refetchLive } = useFetch(liveFetcher);
   const live = showLive && !liveError ? liveData : null;
-  const items = showLive ? applyHall2Observation(data?.items ?? [], live) : data?.items ?? [];
-  const summary = showLive ? live?.level ?? null : congestionSummary(items);
+  const { forHall, setForHall } = useThresholds();
+const thresholds = forHall(id);
+const baseItems = showLive
+  ? applyHall2Observation(data?.items ?? [], live)
+  : data?.items ?? [];
+// ESP32 측정 구역은 값이 "회/5초"라서 퍼센트 기준을 적용하지 않음
+const items = applyThresholds(
+  baseItems,
+  thresholds,
+  showLive ? (item) => isHall2SensorZone(item) : undefined,
+);
+const summary = showLive
+  ? live?.level ?? null
+  : congestionSummary(items, thresholds);
   useEffect(() => {
     if (isDemo && !showLive) return;
     const timer = window.setInterval(() => {
@@ -110,7 +132,11 @@ const [favorites, setFavorites, saveError] = useSaved<string[]>(
           <div className="congestion-panel">
             <div className="welcome-preview-heading">
               <strong className="hall-title">{data.label}<HallBadge level={summary} /></strong>
-              <small>{showLive ? "ESP32 구역별 혼잡도" : isDemo ? "예시 데이터" : "구역별 혼잡도"}</small>
+              <ThresholdControl
+                thresholds={thresholds}
+                onChange={(next) => setForHall(id, next)}
+                note={showLive ? "ESP32 측정 구역은 기준 설정이 적용되지 않아요." : undefined}
+              />
             </div>
             {showLive && (
               <p className="zone-note" role="status">
